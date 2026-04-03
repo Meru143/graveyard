@@ -5,7 +5,7 @@ use crate::config::{loader::load_config, merge_cli};
 use crate::graph::{build_graph, find_dead_candidates, find_dead_cycles, find_test_only};
 use crate::graph::reachability::find_reachable;
 use crate::parse::{cache::ParseCache, parse_all};
-use crate::parse::types::{Finding, FindingTag, ScoreBreakdown};
+use crate::scoring::assemble_findings;
 use crate::scoring::git_history::{
     commit_count_90d, deadness_age_days, get_head_sha, open_repo, score_all_git,
 };
@@ -55,19 +55,7 @@ pub fn run(args: ScanArgs) -> Result<()> {
                 )
             })
         });
-    let supported_tags = [
-        FindingTag::Dead,
-        FindingTag::ExportedUnused,
-        FindingTag::InDeadCycle,
-        FindingTag::TestOnly,
-    ];
-    let placeholder_breakdown = ScoreBreakdown {
-        age_factor: 0.0,
-        ref_factor: 0.0,
-        scope_factor: 0.0,
-        churn_factor: 0.0,
-    };
-    let findings: Vec<Finding> = Vec::new();
+    let findings = assemble_findings(&graph, &dead, &dead_cycles, &test_only, &git_scores, &config);
 
     tracing::debug!(
         path = ?args.path,
@@ -84,9 +72,7 @@ pub fn run(args: ScanArgs) -> Result<()> {
         git_score_count = git_scores.len(),
         git_preview_age_days = git_preview.map(|(age_days, _)| age_days),
         git_preview_commits_90d = git_preview.map(|(_, commits_90d)| commits_90d),
-        supported_tag_count = supported_tags.len(),
-        placeholder_finding_count = findings.len(),
-        placeholder_breakdown = ?placeholder_breakdown,
+        finding_count = findings.len(),
         "scan command initialized"
     );
     Ok(())
