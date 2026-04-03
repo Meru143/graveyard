@@ -45,6 +45,9 @@ insta = { version = "1.47.2", features = ["json"] }
 predicates = "3.1.4"
 tempfile = "3.27.0"
 
+[profile.dev]
+opt-level = 1
+
 [profile.release]
 opt-level = 3
 lto = true

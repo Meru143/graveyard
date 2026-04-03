@@ -1,5 +1,7 @@
+.PHONY: lint format format-check test test-integration coverage build audit clean install snapshots bench
+
 lint:
-	cargo clippy -- -D warnings
+	cargo clippy --all-targets -- -D warnings
 
 format:
 	cargo fmt
@@ -27,3 +29,9 @@ clean:
 
 install:
 	cargo install --path .
+
+snapshots:
+	cargo insta review
+
+bench:
+	cargo bench
