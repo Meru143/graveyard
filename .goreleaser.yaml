@@ -2,9 +2,19 @@ version: 2
 
 project_name: graveyard
 
+before:
+  hooks:
+    - cargo fetch --locked
+
 builds:
-  - builder: rust
+  - id: graveyard
+    builder: rust
     binary: graveyard
+    command: zigbuild
+    tool: cargo
+    flags:
+      - --release
+      - --locked
     targets:
       - x86_64-unknown-linux-gnu
       - aarch64-unknown-linux-gnu
@@ -13,17 +23,35 @@ builds:
       - x86_64-pc-windows-gnu
 
 archives:
-  - formats: [tar.gz]
-  - id: windows
-    formats: [zip]
-    builds: [graveyard]
+  - id: graveyard
+    ids:
+      - graveyard
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    formats:
+      - tar.gz
+    format_overrides:
+      - goos: windows
+        formats:
+          - zip
 
 checksum:
-  name_template: "checksums.txt"
+  name_template: checksums.txt
+
+changelog:
+  sort: asc
+  use: git
 
 brews:
-  - repository:
+  - name: graveyard
+    ids:
+      - graveyard
+    repository:
       owner: you
       name: homebrew-tap
     homepage: "https://github.com/you/graveyard"
-    description: "Scan polyglot repositories for dead code."
+    description: "Scan polyglot repositories for dead code and rank findings with git-history-weighted confidence."
+    license: "MIT"
+    test: |
+      system "#{bin}/graveyard", "--version"
+    install: |
+      bin.install "graveyard"

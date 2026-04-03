@@ -1,13 +1,40 @@
 {
   "name": "graveyard",
   "version": "0.1.0",
-  "description": "Scan polyglot repositories for dead code.",
+  "description": "Scan polyglot repositories for dead code and rank findings with git-history-weighted confidence.",
+  "license": "MIT",
+  "homepage": "https://github.com/you/graveyard",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/you/graveyard.git"
+  },
   "bin": {
-    "graveyard": "./bin/graveyard"
+    "graveyard": "./bin/graveyard.js"
   },
   "files": [
-    "bin"
+    "bin",
+    "LICENSE",
+    "README.md"
   ],
-  "optionalDependencies": {},
-  "license": "MIT"
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "npm@11.12.0",
+  "publishConfig": {
+    "access": "public"
+  },
+  "workspaces": [
+    "npm/*"
+  ],
+  "scripts": {
+    "prepack": "cargo build --release && node scripts/prepare-npm-packages.js",
+    "postpack": "node scripts/cleanup-npm-packages.js"
+  },
+  "optionalDependencies": {
+    "graveyard-darwin-arm64": "0.1.0",
+    "graveyard-darwin-x64": "0.1.0",
+    "graveyard-linux-arm64": "0.1.0",
+    "graveyard-linux-x64": "0.1.0",
+    "graveyard-windows-x64": "0.1.0"
+  }
 }

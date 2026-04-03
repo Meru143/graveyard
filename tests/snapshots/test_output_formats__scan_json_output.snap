@@ -6,7 +6,7 @@ expression: value
   "findings": [
     {
       "confidence": 0.74,
-      "deadness_age_days": 400.0,
+      "deadness_age_days": "[age_days]",
       "file": "./src/main.rs",
       "in_degree": 0,
       "kind": "function",
@@ -14,7 +14,7 @@ expression: value
       "line_end": 2,
       "line_start": 2,
       "score_breakdown": {
-        "age_factor": 0.5866175789173301,
+        "age_factor": "[age_factor]",
         "churn_factor": 1.0,
         "ref_factor": 1.0,
         "scope_factor": 0.4

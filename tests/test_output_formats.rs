@@ -89,6 +89,22 @@ fn sanitized_json_output(repo: &TmpGitRepo, format: &str) -> Value {
         *scanned_at = Value::String("[timestamp]".to_string());
     }
 
+    if let Some(findings) = value.get_mut("findings").and_then(Value::as_array_mut) {
+        for finding in findings {
+            if let Some(age_days) = finding.get_mut("deadness_age_days") {
+                *age_days = Value::String("[age_days]".to_string());
+            }
+
+            if let Some(age_factor) = finding
+                .get_mut("score_breakdown")
+                .and_then(Value::as_object_mut)
+                .and_then(|score_breakdown| score_breakdown.get_mut("age_factor"))
+            {
+                *age_factor = Value::String("[age_factor]".to_string());
+            }
+        }
+    }
+
     value
 }
 

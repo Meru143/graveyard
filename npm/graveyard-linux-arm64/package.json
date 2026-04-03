@@ -1,0 +1,26 @@
+{
+  "name": "graveyard-linux-arm64",
+  "version": "0.1.0",
+  "description": "graveyard binary for linux arm64",
+  "license": "MIT",
+  "homepage": "https://github.com/you/graveyard",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/you/graveyard.git"
+  },
+  "os": [
+    "linux"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "files": [
+    "bin"
+  ],
+  "bin": {
+    "graveyard": "bin/graveyard"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
