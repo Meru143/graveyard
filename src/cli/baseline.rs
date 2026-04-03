@@ -5,6 +5,8 @@ use crate::cli::{BaselineArgs, BaselineCommand};
 pub fn run(args: BaselineArgs) -> Result<()> {
     let _save_baseline: fn(&[crate::parse::types::Finding], &std::path::Path) -> anyhow::Result<()> =
         crate::baseline::save_baseline;
+    let _load_baseline: fn(&std::path::Path) -> anyhow::Result<std::collections::HashSet<String>> =
+        crate::baseline::load_baseline;
 
     match args.command {
         BaselineCommand::Save(save) => {

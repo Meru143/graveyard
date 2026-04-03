@@ -1,8 +1,10 @@
 use std::path::Path;
 
-use anyhow::Result;
+use std::collections::HashSet;
+
+use anyhow::{Context, Result, anyhow};
 use chrono::Utc;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::output::json::JsonFinding;
 use crate::parse::types::Finding;
@@ -12,6 +14,11 @@ struct BaselineEnvelope {
     graveyard_version: &'static str,
     baseline_created_at: String,
     total_findings: usize,
+    findings: Vec<JsonFinding>,
+}
+
+#[derive(Debug, Deserialize)]
+struct BaselineLoadEnvelope {
     findings: Vec<JsonFinding>,
 }
 
@@ -32,6 +39,24 @@ pub fn save_baseline(findings: &[Finding], output_path: &Path) -> Result<()> {
     Ok(())
 }
 
+pub fn load_baseline(path: &Path) -> Result<HashSet<String>> {
+    let content = std::fs::read_to_string(path).map_err(|error| {
+        if error.kind() == std::io::ErrorKind::NotFound {
+            anyhow!("Baseline file not found: {:?}", path)
+        } else {
+            anyhow!(error)
+        }
+    })?;
+    let envelope: BaselineLoadEnvelope = serde_json::from_str(&content)
+        .with_context(|| format!("Baseline file is malformed: {:?}", path))?;
+
+    Ok(envelope
+        .findings
+        .into_iter()
+        .map(|finding| finding.symbol_fqn)
+        .collect())
+}
+
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
@@ -40,7 +65,7 @@ mod tests {
     use tempfile::TempDir;
 
     use crate::parse::types::{Finding, FindingTag, ScoreBreakdown, Symbol, SymbolKind};
-    use super::save_baseline;
+    use super::{load_baseline, save_baseline};
 
     fn sample_finding() -> Finding {
         Finding {
@@ -83,5 +108,30 @@ mod tests {
         assert!(value["baseline_created_at"].as_str().is_some());
         assert_eq!(value["findings"][0]["symbol_fqn"], "src/main.rs::old_fn");
         assert_eq!(value["findings"][0]["confidence"], 0.82);
+    }
+
+    #[test]
+    fn load_baseline_returns_symbol_fqns_from_saved_file() {
+        let temp_dir = TempDir::new().expect("temp dir should exist");
+        let output_path = temp_dir.path().join("baseline.json");
+
+        save_baseline(&[sample_finding()], &output_path).expect("baseline save should succeed");
+        let baseline = load_baseline(&output_path).expect("baseline load should succeed");
+
+        assert_eq!(baseline.len(), 1);
+        assert!(baseline.contains("src/main.rs::old_fn"));
+    }
+
+    #[test]
+    fn load_baseline_reports_missing_files_clearly() {
+        let temp_dir = TempDir::new().expect("temp dir should exist");
+        let missing_path = temp_dir.path().join("missing.json");
+
+        let error = load_baseline(&missing_path).expect_err("missing baseline should fail");
+
+        assert_eq!(
+            error.to_string(),
+            format!("Baseline file not found: {:?}", missing_path)
+        );
     }
 }
