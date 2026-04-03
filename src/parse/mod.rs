@@ -12,6 +12,7 @@ use std::path::{Path, PathBuf};
 use std::time::UNIX_EPOCH;
 
 use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
+use path_slash::PathExt;
 use rayon::prelude::*;
 use sha2::{Digest, Sha256};
 use tree_sitter::Node;
@@ -62,10 +63,18 @@ pub fn parse_all(
             match result {
                 Ok(Ok(parsed)) => parsed,
                 Ok(Err(error)) => {
+                    eprintln!(
+                        "[WARN]  {}: unreadable file — file skipped",
+                        path.to_slash_lossy()
+                    );
                     tracing::warn!(path = ?path, %error, "parse error");
                     (Vec::new(), Vec::new())
                 }
                 Err(_) => {
+                    eprintln!(
+                        "[WARN]  {}: tree-sitter parse error — file skipped",
+                        path.to_slash_lossy()
+                    );
                     tracing::warn!(path = ?path, "parse panic");
                     (Vec::new(), Vec::new())
                 }
@@ -237,6 +246,20 @@ mod tests {
             parse_all(&files, temp.path(), &cache, "HEAD", &Config::default());
 
         assert!(symbols.iter().any(|symbol| symbol.name == "helper"));
+        assert!(references.is_empty());
+    }
+
+    #[test]
+    fn parse_all_skips_missing_files_without_bubbling_errors() {
+        let temp = tempdir().expect("temp dir should be created");
+        let missing = temp.path().join("missing.py");
+        let files = vec![(missing, Language::Python)];
+        let cache = ParseCache::open(temp.path(), false);
+
+        let (symbols, references) =
+            parse_all(&files, temp.path(), &cache, "HEAD", &Config::default());
+
+        assert!(symbols.is_empty());
         assert!(references.is_empty());
     }
 }

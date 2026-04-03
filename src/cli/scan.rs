@@ -15,14 +15,27 @@ use crate::scoring::git_history::{
 };
 use crate::walker::{manifest::detect_languages, walk};
 
+struct ScanExecution {
+    findings: Vec<Finding>,
+    file_count: usize,
+}
+
 pub(crate) fn load_scan_config(args: &ScanArgs) -> Result<Config> {
     let file_config = load_config(&args.config)?;
     Ok(merge_cli(file_config, args))
 }
 
-pub fn run_scan(args: &ScanArgs, config: Config) -> Result<Vec<Finding>> {
+fn execute_scan(args: &ScanArgs, config: Config) -> Result<ScanExecution> {
     let languages = detect_languages(&args.path, &config);
     let files = walk(&args.path, &config);
+    if files.is_empty() {
+        tracing::debug!(path = ?args.path, detected_languages = ?languages, "no supported files found");
+        return Ok(ScanExecution {
+            findings: Vec::new(),
+            file_count: 0,
+        });
+    }
+
     let repo = if config.no_git {
         None
     } else {
@@ -88,13 +101,29 @@ pub fn run_scan(args: &ScanArgs, config: Config) -> Result<Vec<Finding>> {
         finding_count = findings.len(),
         "scan command initialized"
     );
-    Ok(findings)
+    Ok(ScanExecution {
+        findings,
+        file_count: files.len(),
+    })
+}
+
+pub fn run_scan(args: &ScanArgs, config: Config) -> Result<Vec<Finding>> {
+    Ok(execute_scan(args, config)?.findings)
 }
 
 pub fn run(args: ScanArgs) -> Result<()> {
     let started_at = Instant::now();
     let config = load_scan_config(&args)?;
-    let findings = run_scan(&args, config.clone())?;
+    let execution = execute_scan(&args, config.clone())?;
+    if execution.file_count == 0 {
+        eprintln!(
+            "[INFO]  No Python/JS/TS/Go/Rust files found under {} — nothing to scan",
+            args.path.display()
+        );
+        return Ok(());
+    }
+
+    let findings = execution.findings;
     write_output(&findings, &config)?;
     eprintln!("Scan completed in {:.2}s", started_at.elapsed().as_secs_f64());
 

@@ -3,10 +3,11 @@ use std::io::ErrorKind;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
-use anyhow::{anyhow, Context, Result};
+use anyhow::{Context, Result};
 use serde::Deserialize;
 
 use crate::cli::parse_duration_arg;
+use crate::error::ConfigError;
 
 use super::{Config, IgnoreConfig, OutputFormat, ScoringConfig};
 
@@ -18,8 +19,7 @@ pub fn load_config(config_path: &Path) -> Result<Config> {
     };
 
     let raw: RawConfig = toml::from_str(&content)
-        .map_err(|error| anyhow!(".graveyard.toml: {error}"))
-        .context(".graveyard.toml")?;
+        .map_err(|error| format_toml_error(&content, error))?;
 
     let mut config = Config::default();
 
@@ -31,7 +31,7 @@ pub fn load_config(config_path: &Path) -> Result<Config> {
         if let Some(min_age) = graveyard.min_age {
             config.min_age = Some(Duration::from_secs(
                 parse_duration_arg(&min_age)
-                    .map_err(|error| anyhow!(".graveyard.toml: {error}"))?
+                    .map_err(|error| ConfigError::new(format!(".graveyard.toml: {error}")))?
                     .as_secs(),
             ));
         }
@@ -114,19 +114,37 @@ pub fn load_config(config_path: &Path) -> Result<Config> {
         }
     }
 
-    validate_scoring(&config.scoring)?;
+    validate_scoring(&config.scoring)
+        .map_err(|message| ConfigError::new(format!(".graveyard.toml: {message}")))?;
     Ok(config)
 }
 
-fn validate_scoring(scoring: &ScoringConfig) -> Result<()> {
+fn validate_scoring(scoring: &ScoringConfig) -> std::result::Result<(), String> {
     let total =
         scoring.age_weight + scoring.ref_weight + scoring.scope_weight + scoring.churn_weight;
 
     if (total - 1.0).abs() > f64::EPSILON * 10.0 {
-        return Err(anyhow!("scoring weights must sum to 1.0"));
+        return Err("scoring weights must sum to 1.0".to_string());
     }
 
     Ok(())
+}
+
+fn format_toml_error(content: &str, error: toml::de::Error) -> ConfigError {
+    let line = error
+        .span()
+        .map(|span| line_number(content, span.start))
+        .unwrap_or(1);
+
+    ConfigError::new(format!(
+        ".graveyard.toml: invalid TOML at line {line}: {}",
+        error.message()
+    ))
+}
+
+fn line_number(content: &str, index: usize) -> usize {
+    let safe_index = index.min(content.len());
+    content[..safe_index].chars().filter(|character| *character == '\n').count() + 1
 }
 
 #[derive(Debug, Default, Deserialize)]

@@ -3,6 +3,7 @@ use std::cell::Cell;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
 
+use anyhow::Context;
 use chrono::Utc;
 use git2::{Commit, DiffDelta, DiffHunk, ErrorCode, Repository, Sort};
 use path_slash::PathExt;
@@ -30,8 +31,8 @@ struct FileTouch {
 pub fn open_repo(root: &Path) -> Option<Repository> {
     match Repository::discover(root) {
         Ok(repo) => Some(repo),
-        Err(error) => {
-            tracing::warn!("not a git repository: {}", error);
+        Err(_) => {
+            eprintln!("[WARN]  Not a git repository; running in static-only mode (--no-git to suppress)");
             None
         }
     }
@@ -48,7 +49,10 @@ pub fn get_head_sha(repo: &Repository) -> String {
 }
 
 pub fn deadness_age_days(symbol: &Symbol, repo: &Repository, repo_root: &Path) -> f64 {
-    match collect_file_history(&symbol.file, repo, repo_root, None) {
+    match collect_file_history(&symbol.file, repo, repo_root, None)
+        .map_err(anyhow::Error::from)
+        .context("git history walk")
+    {
         Ok(history) => age_days_from_history(symbol, &history, Utc::now().timestamp()),
         Err(error) => {
             log_git_fallback(&symbol.file, &error);
@@ -65,7 +69,10 @@ pub fn commit_count_90d(file: &Path, repo: &Repository, repo_root: &Path) -> usi
         return count;
     }
 
-    match collect_file_history(file, repo, repo_root, None) {
+    match collect_file_history(file, repo, repo_root, None)
+        .map_err(anyhow::Error::from)
+        .context("git history walk")
+    {
         Ok(history) => cache_commit_count(cache_key, commit_count_from_history(&history)),
         Err(error) => {
             log_git_fallback(file, &error);
@@ -84,7 +91,10 @@ pub fn score_all_git(symbols: &[Symbol], repo: &Repository, root: &Path) -> Hash
     }
 
     for (file, file_symbols) in grouped {
-        let history = match collect_file_history(&file, repo, root, Some(500)) {
+        let history = match collect_file_history(&file, repo, root, Some(500))
+            .map_err(anyhow::Error::from)
+            .context("git history walk")
+        {
             Ok(history) => history,
             Err(error) => {
                 log_git_fallback(&file, &error);
@@ -256,9 +266,15 @@ fn file_cache_key(file: &Path, repo: &Repository, repo_root: &Path, head_sha: &s
     )
 }
 
-fn log_git_fallback(file: &Path, error: &git2::Error) {
-    if error.code() == ErrorCode::NotFound {
-        tracing::warn!(path = ?file, %error, "shallow git clone detected; static-only for this file");
+fn log_git_fallback(file: &Path, error: &anyhow::Error) {
+    if error
+        .downcast_ref::<git2::Error>()
+        .is_some_and(|git_error| git_error.code() == ErrorCode::NotFound)
+    {
+        eprintln!(
+            "[WARN]  Shallow git clone detected for {} — static-only for this file",
+            file.to_slash_lossy()
+        );
     } else {
         tracing::warn!(path = ?file, %error, "git history unavailable; static-only for this file");
     }
