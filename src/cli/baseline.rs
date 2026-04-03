@@ -3,15 +3,9 @@ use std::path::PathBuf;
 use anyhow::Result;
 
 use crate::cli::{BaselineArgs, BaselineCommand, ScanArgs};
+use crate::output::write_output;
 
 pub fn run(args: BaselineArgs) -> Result<()> {
-    let _load_baseline: fn(&std::path::Path) -> anyhow::Result<std::collections::HashSet<String>> =
-        crate::baseline::load_baseline;
-    let _diff_findings: fn(
-        Vec<crate::parse::types::Finding>,
-        std::collections::HashSet<String>,
-    ) -> Vec<crate::parse::types::Finding> = crate::baseline::diff_findings;
-
     match args.command {
         BaselineCommand::Save(save) => {
             let scan_args = scan_args(save.path, args.verbose);
@@ -19,7 +13,15 @@ pub fn run(args: BaselineArgs) -> Result<()> {
             crate::baseline::save_baseline(&findings, &save.output)?;
         }
         BaselineCommand::Diff(diff) => {
-            tracing::debug!(path = ?diff.path, baseline = ?diff.baseline, ci = diff.ci, "baseline diff initialized");
+            let scan_args = scan_args(diff.path, args.verbose);
+            let (config, findings) = crate::cli::scan::collect_findings(&scan_args)?;
+            let baseline_fqns = crate::baseline::load_baseline(&diff.baseline)?;
+            let findings = crate::baseline::diff_findings(findings, baseline_fqns);
+            write_output(&findings, &config)?;
+
+            if diff.ci && !findings.is_empty() {
+                std::process::exit(1);
+            }
         }
     }
 
@@ -39,7 +41,7 @@ fn scan_args(path: PathBuf, verbose: u8) -> ScanArgs {
         ci: false,
         baseline: None,
         no_git: false,
-        no_cache: false,
+        no_cache: true,
         cache_dir: None,
         config: PathBuf::from(".graveyard.toml"),
         verbose,

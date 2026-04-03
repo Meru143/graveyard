@@ -57,3 +57,71 @@ fn main() {}
     assert_eq!(json["total_findings"], 1);
     assert_eq!(json["findings"][0]["symbol_fqn"], "src/main.rs::stale_helper");
 }
+
+#[test]
+fn baseline_diff_reports_only_new_findings_and_honors_ci() {
+    let repo = write_rust_fixture_repo(
+        r#"
+fn old_dead() {}
+
+fn main() {}
+"#,
+    );
+    let baseline_path = repo.path().join(".graveyard-baseline.json");
+
+    let save_output = Command::cargo_bin("graveyard")
+        .expect("binary should build")
+        .current_dir(repo.path())
+        .args([
+            "baseline",
+            "save",
+            "--output",
+            baseline_path.to_string_lossy().as_ref(),
+        ])
+        .output()
+        .expect("baseline save should execute");
+    assert!(
+        save_output.status.success(),
+        "baseline save should succeed: {save_output:?}"
+    );
+
+    fs::write(
+        repo.path().join("src/main.rs"),
+        r#"
+fn old_dead() {}
+fn brand_new() {}
+
+fn main() {}
+"#,
+    )
+    .expect("updated main file should be written");
+
+    let diff_output = Command::cargo_bin("graveyard")
+        .expect("binary should build")
+        .current_dir(repo.path())
+        .args([
+            "baseline",
+            "diff",
+            "--baseline",
+            baseline_path.to_string_lossy().as_ref(),
+            "--ci",
+        ])
+        .output()
+        .expect("baseline diff should execute");
+
+    assert_eq!(
+        diff_output.status.code(),
+        Some(1),
+        "baseline diff should fail CI for new findings: {diff_output:?}"
+    );
+
+    let stdout = String::from_utf8_lossy(&diff_output.stdout);
+    assert!(
+        stdout.contains("brand_new"),
+        "diff output should include the new finding: {stdout}"
+    );
+    assert!(
+        !stdout.contains("old_dead"),
+        "diff output should suppress baseline findings: {stdout}"
+    );
+}
