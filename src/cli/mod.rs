@@ -64,12 +64,12 @@ pub struct ScanArgs {
     pub path: PathBuf,
     #[arg(long, value_parser = parse_duration_arg)]
     pub min_age: Option<Duration>,
-    #[arg(long, default_value_t = 0.5, value_parser = parse_confidence_arg)]
-    pub min_confidence: f64,
-    #[arg(long, default_value_t = 0)]
-    pub top: usize,
-    #[arg(long, value_enum, default_value_t = OutputFormat::Table)]
-    pub format: OutputFormat,
+    #[arg(long, value_parser = parse_confidence_arg)]
+    pub min_confidence: Option<f64>,
+    #[arg(long)]
+    pub top: Option<usize>,
+    #[arg(long, value_enum)]
+    pub format: Option<OutputFormat>,
     #[arg(long)]
     pub output: Option<PathBuf>,
     #[arg(long)]
@@ -84,8 +84,8 @@ pub struct ScanArgs {
     pub no_git: bool,
     #[arg(long)]
     pub no_cache: bool,
-    #[arg(long, default_value = "~/.cache/graveyard")]
-    pub cache_dir: PathBuf,
+    #[arg(long)]
+    pub cache_dir: Option<PathBuf>,
     #[arg(long, default_value = ".graveyard.toml")]
     pub config: PathBuf,
     #[arg(long, short, action = ArgAction::Count)]
@@ -204,8 +204,9 @@ mod tests {
         let cli = Cli::parse_from(["graveyard", "scan"]);
         match cli.command {
             Commands::Scan(args) => {
-                assert_eq!(args.top, 0);
-                assert_eq!(args.min_confidence, 0.5);
+                assert_eq!(args.top, None);
+                assert_eq!(args.min_confidence, None);
+                assert_eq!(args.format, None);
             }
             _ => panic!("expected scan command"),
         }
