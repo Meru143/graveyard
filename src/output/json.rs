@@ -90,7 +90,7 @@ mod tests {
     use crate::config::Config;
     use crate::parse::types::{Finding, FindingTag, ScoreBreakdown, Symbol, SymbolKind};
 
-    use super::render_json;
+    use super::{JsonFinding, render_json};
 
     fn finding() -> Finding {
         Finding {
@@ -127,5 +127,18 @@ mod tests {
         assert_eq!(value["total_findings"], 1);
         assert_eq!(value["min_confidence"], 0.5);
         assert_eq!(value["findings"][0]["symbol_fqn"], "src/main.rs::candidate");
+    }
+
+    #[test]
+    fn json_finding_round_trips_from_rendered_output() {
+        let output = render_json(&[finding()], &Config::default()).expect("json should render");
+        let value: Value = serde_json::from_str(&output).expect("output should be valid json");
+        let finding: JsonFinding =
+            serde_json::from_value(value["findings"][0].clone()).expect("finding should deserialize");
+
+        assert_eq!(finding.symbol_fqn, "src/main.rs::candidate");
+        assert_eq!(finding.kind, "function");
+        assert_eq!(finding.tag, "dead");
+        assert_eq!(finding.score_breakdown.age_factor, 0.8);
     }
 }
