@@ -1,20 +1,21 @@
 use anyhow::Result;
 
 use crate::cli::ScanArgs;
-use crate::config::{loader::load_config, merge_cli};
+use crate::config::{Config, loader::load_config, merge_cli};
 use crate::graph::{build_graph, find_dead_candidates, find_dead_cycles, find_test_only};
 use crate::graph::reachability::find_reachable;
 use crate::output::write_output;
 use crate::parse::{cache::ParseCache, parse_all};
+use crate::parse::types::Finding;
 use crate::scoring::assemble_findings;
 use crate::scoring::git_history::{
     commit_count_90d, deadness_age_days, get_head_sha, open_repo, score_all_git,
 };
 use crate::walker::{manifest::detect_languages, walk};
 
-pub fn run(args: ScanArgs) -> Result<()> {
+pub(crate) fn collect_findings(args: &ScanArgs) -> Result<(Config, Vec<Finding>)> {
     let file_config = load_config(&args.config)?;
-    let config = merge_cli(file_config, &args);
+    let config = merge_cli(file_config, args);
     let languages = detect_languages(&args.path, &config);
     let files = walk(&args.path, &config);
     let repo = if config.no_git {
@@ -76,6 +77,11 @@ pub fn run(args: ScanArgs) -> Result<()> {
         finding_count = findings.len(),
         "scan command initialized"
     );
+    Ok((config, findings))
+}
+
+pub fn run(args: ScanArgs) -> Result<()> {
+    let (config, findings) = collect_findings(&args)?;
     write_output(&findings, &config)?;
     Ok(())
 }
