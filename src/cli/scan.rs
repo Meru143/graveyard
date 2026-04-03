@@ -4,6 +4,7 @@ use crate::cli::ScanArgs;
 use crate::config::{loader::load_config, merge_cli};
 use crate::graph::{build_graph, find_dead_candidates, find_dead_cycles, find_test_only};
 use crate::graph::reachability::find_reachable;
+use crate::output::write_output;
 use crate::parse::{cache::ParseCache, parse_all};
 use crate::scoring::assemble_findings;
 use crate::scoring::git_history::{
@@ -75,5 +76,6 @@ pub fn run(args: ScanArgs) -> Result<()> {
         finding_count = findings.len(),
         "scan command initialized"
     );
+    write_output(&findings, &config)?;
     Ok(())
 }
