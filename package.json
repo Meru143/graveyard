@@ -1,0 +1,13 @@
+{
+  "name": "graveyard",
+  "version": "0.1.0",
+  "description": "Scan polyglot repositories for dead code.",
+  "bin": {
+    "graveyard": "./bin/graveyard"
+  },
+  "files": [
+    "bin"
+  ],
+  "optionalDependencies": {},
+  "license": "MIT"
+}

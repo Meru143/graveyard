@@ -1,0 +1,29 @@
+version: 2
+
+project_name: graveyard
+
+builds:
+  - builder: rust
+    binary: graveyard
+    targets:
+      - x86_64-unknown-linux-gnu
+      - aarch64-unknown-linux-gnu
+      - x86_64-apple-darwin
+      - aarch64-apple-darwin
+      - x86_64-pc-windows-gnu
+
+archives:
+  - formats: [tar.gz]
+  - id: windows
+    formats: [zip]
+    builds: [graveyard]
+
+checksum:
+  name_template: "checksums.txt"
+
+brews:
+  - repository:
+      owner: you
+      name: homebrew-tap
+    homepage: "https://github.com/you/graveyard"
+    description: "Scan polyglot repositories for dead code."

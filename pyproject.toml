@@ -1,0 +1,18 @@
+[build-system]
+requires = ["maturin>=1.12.6,<2"]
+build-backend = "maturin"
+
+[project]
+name = "graveyard"
+version = "0.1.0"
+description = "Scan polyglot repositories for dead code."
+requires-python = ">=3.8"
+classifiers = [
+  "Programming Language :: Python",
+  "Programming Language :: Rust",
+  "Topic :: Software Development :: Quality Assurance",
+]
+
+[tool.maturin]
+bindings = "bin"
+python-source = "python"

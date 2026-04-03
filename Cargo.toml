@@ -1,0 +1,51 @@
+[package]
+name = "graveyard"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+license = "MIT"
+description = "Scan polyglot repositories for dead code and rank findings with git-history-weighted confidence."
+repository = "https://github.com/you/graveyard"
+homepage = "https://github.com/you/graveyard"
+keywords = ["dead-code", "static-analysis", "linter"]
+categories = ["development-tools::testing", "command-line-utilities"]
+
+[dependencies]
+anyhow = "1.0.102"
+chrono = "0.4.44"
+clap = { version = "=4.6.0", features = ["derive", "env"] }
+clap_complete = "=4.5.66"
+dirs = "6.0.0"
+git2 = { version = "=0.20.4", features = ["vendored-libgit2"] }
+humantime = "2.3.0"
+ignore = "0.4.25"
+indicatif = { version = "0.18.4", features = ["rayon"] }
+owo-colors = "4.3.0"
+path-slash = "0.2.1"
+petgraph = { version = "=0.8.2", features = ["serde-1"] }
+rayon = "1.11.0"
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+sha2 = "0.11.0"
+sled = "0.34"
+toml = "1.1.2"
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
+tree-sitter = "=0.26.3"
+tree-sitter-go = "0.25.0"
+tree-sitter-javascript = "0.25.0"
+tree-sitter-python = "0.25.0"
+tree-sitter-rust = "0.24.2"
+tree-sitter-typescript = "0.23.2"
+
+[dev-dependencies]
+assert_cmd = "2.2.0"
+insta = { version = "1.47.2", features = ["json"] }
+predicates = "3.1.4"
+tempfile = "3.27.0"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
