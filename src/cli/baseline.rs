@@ -7,6 +7,10 @@ pub fn run(args: BaselineArgs) -> Result<()> {
         crate::baseline::save_baseline;
     let _load_baseline: fn(&std::path::Path) -> anyhow::Result<std::collections::HashSet<String>> =
         crate::baseline::load_baseline;
+    let _diff_findings: fn(
+        Vec<crate::parse::types::Finding>,
+        std::collections::HashSet<String>,
+    ) -> Vec<crate::parse::types::Finding> = crate::baseline::diff_findings;
 
     match args.command {
         BaselineCommand::Save(save) => {

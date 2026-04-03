@@ -57,6 +57,13 @@ pub fn load_baseline(path: &Path) -> Result<HashSet<String>> {
         .collect())
 }
 
+pub fn diff_findings(current: Vec<Finding>, baseline_fqns: HashSet<String>) -> Vec<Finding> {
+    current
+        .into_iter()
+        .filter(|finding| !baseline_fqns.contains(&finding.symbol.fqn))
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use std::path::PathBuf;
@@ -65,7 +72,7 @@ mod tests {
     use tempfile::TempDir;
 
     use crate::parse::types::{Finding, FindingTag, ScoreBreakdown, Symbol, SymbolKind};
-    use super::{load_baseline, save_baseline};
+    use super::{diff_findings, load_baseline, save_baseline};
 
     fn sample_finding() -> Finding {
         Finding {
@@ -133,5 +140,19 @@ mod tests {
             error.to_string(),
             format!("Baseline file not found: {:?}", missing_path)
         );
+    }
+
+    #[test]
+    fn diff_findings_returns_only_new_fqns() {
+        let mut new_finding = sample_finding();
+        new_finding.symbol.fqn = "src/main.rs::brand_new".to_string();
+        new_finding.symbol.name = "brand_new".to_string();
+
+        let current = vec![sample_finding(), new_finding.clone()];
+        let baseline = std::collections::HashSet::from(["src/main.rs::old_fn".to_string()]);
+
+        let diff = diff_findings(current, baseline);
+
+        assert_eq!(diff, vec![new_finding]);
     }
 }
