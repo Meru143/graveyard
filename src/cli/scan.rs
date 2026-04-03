@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use anyhow::Result;
 
 use crate::cli::ScanArgs;
@@ -13,9 +15,12 @@ use crate::scoring::git_history::{
 };
 use crate::walker::{manifest::detect_languages, walk};
 
-pub(crate) fn collect_findings(args: &ScanArgs) -> Result<(Config, Vec<Finding>)> {
+pub(crate) fn load_scan_config(args: &ScanArgs) -> Result<Config> {
     let file_config = load_config(&args.config)?;
-    let config = merge_cli(file_config, args);
+    Ok(merge_cli(file_config, args))
+}
+
+pub fn run_scan(args: &ScanArgs, config: Config) -> Result<Vec<Finding>> {
     let languages = detect_languages(&args.path, &config);
     let files = walk(&args.path, &config);
     let repo = if config.no_git {
@@ -57,7 +62,13 @@ pub(crate) fn collect_findings(args: &ScanArgs) -> Result<(Config, Vec<Finding>)
                 )
             })
         });
-    let findings = assemble_findings(&graph, &dead, &dead_cycles, &test_only, &git_scores, &config);
+    let mut findings =
+        assemble_findings(&graph, &dead, &dead_cycles, &test_only, &git_scores, &config);
+
+    if let Some(baseline_path) = &config.baseline {
+        let baseline_fqns = crate::baseline::load_baseline(baseline_path)?;
+        findings = crate::baseline::diff_findings(findings, baseline_fqns);
+    }
 
     tracing::debug!(
         path = ?args.path,
@@ -77,11 +88,111 @@ pub(crate) fn collect_findings(args: &ScanArgs) -> Result<(Config, Vec<Finding>)
         finding_count = findings.len(),
         "scan command initialized"
     );
-    Ok((config, findings))
+    Ok(findings)
 }
 
 pub fn run(args: ScanArgs) -> Result<()> {
-    let (config, findings) = collect_findings(&args)?;
+    let started_at = Instant::now();
+    let config = load_scan_config(&args)?;
+    let findings = run_scan(&args, config.clone())?;
     write_output(&findings, &config)?;
+    eprintln!("Scan completed in {:.2}s", started_at.elapsed().as_secs_f64());
+
+    if config.fail_on_findings && !findings.is_empty() {
+        std::process::exit(1);
+    }
+
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+    use std::path::PathBuf;
+
+    use tempfile::tempdir;
+
+    use crate::baseline::save_baseline;
+    use crate::config::Config;
+    use crate::parse::types::{Finding, FindingTag, ScoreBreakdown, Symbol, SymbolKind};
+
+    use super::{run_scan, ScanArgs};
+
+    #[test]
+    fn run_scan_applies_baseline_diff_before_returning_findings() {
+        let temp = tempdir().expect("temp dir should be created");
+        fs::create_dir_all(temp.path().join("src")).expect("src dir should exist");
+        fs::write(
+            temp.path().join("Cargo.toml"),
+            r#"[package]
+name = "fixture"
+version = "0.1.0"
+edition = "2021"
+"#,
+        )
+        .expect("manifest should be written");
+        fs::write(
+            temp.path().join("src/main.rs"),
+            r#"
+fn old_dead() {}
+
+fn main() {}
+"#,
+        )
+        .expect("rust source should be written");
+
+        let baseline_path = temp.path().join(".graveyard-baseline.json");
+        save_baseline(
+            &[Finding {
+                symbol: Symbol {
+                    fqn: "src/main.rs::old_dead".to_string(),
+                    name: "old_dead".to_string(),
+                    kind: SymbolKind::Function,
+                    language: "rust".to_string(),
+                    file: temp.path().join("src/main.rs"),
+                    line_start: 2,
+                    line_end: 2,
+                    is_exported: false,
+                    is_test: false,
+                },
+                tag: FindingTag::Dead,
+                confidence: 0.82,
+                deadness_age_days: 120.0,
+                in_degree: 0,
+                score_breakdown: ScoreBreakdown {
+                    age_factor: 1.0,
+                    ref_factor: 1.0,
+                    scope_factor: 1.0,
+                    churn_factor: 0.5,
+                },
+            }],
+            &baseline_path,
+        )
+        .expect("baseline should be saved");
+
+        let args = ScanArgs {
+            path: temp.path().to_path_buf(),
+            min_age: None,
+            min_confidence: None,
+            top: None,
+            format: None,
+            output: None,
+            exclude: Vec::new(),
+            ignore_exports: false,
+            ci: false,
+            baseline: Some(PathBuf::from(".graveyard-baseline.json")),
+            no_git: false,
+            no_cache: true,
+            cache_dir: None,
+            config: PathBuf::from(".graveyard.toml"),
+            verbose: 0,
+        };
+        let mut config = Config::default();
+        config.baseline = Some(baseline_path);
+        config.no_cache = true;
+
+        let findings = run_scan(&args, config).expect("run_scan should succeed");
+
+        assert!(findings.is_empty(), "baseline should suppress known findings");
+    }
 }

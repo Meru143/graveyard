@@ -9,12 +9,14 @@ pub fn run(args: BaselineArgs) -> Result<()> {
     match args.command {
         BaselineCommand::Save(save) => {
             let scan_args = scan_args(save.path, args.verbose);
-            let (_, findings) = crate::cli::scan::collect_findings(&scan_args)?;
+            let config = crate::cli::scan::load_scan_config(&scan_args)?;
+            let findings = crate::cli::scan::run_scan(&scan_args, config)?;
             crate::baseline::save_baseline(&findings, &save.output)?;
         }
         BaselineCommand::Diff(diff) => {
             let scan_args = scan_args(diff.path, args.verbose);
-            let (config, findings) = crate::cli::scan::collect_findings(&scan_args)?;
+            let config = crate::cli::scan::load_scan_config(&scan_args)?;
+            let findings = crate::cli::scan::run_scan(&scan_args, config.clone())?;
             let baseline_fqns = crate::baseline::load_baseline(&diff.baseline)?;
             let findings = crate::baseline::diff_findings(findings, baseline_fqns);
             write_output(&findings, &config)?;
