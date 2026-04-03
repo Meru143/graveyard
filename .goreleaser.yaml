@@ -7,7 +7,7 @@ before:
     - cargo fetch --locked
 
 builds:
-  - id: graveyard
+  - id: graveyard-core
     builder: rust
     binary: graveyard
     command: zigbuild
@@ -18,14 +18,25 @@ builds:
     targets:
       - x86_64-unknown-linux-gnu
       - aarch64-unknown-linux-gnu
+      - x86_64-pc-windows-gnu
+  - id: graveyard-darwin
+    builder: rust
+    binary: graveyard
+    command: zigbuild
+    tool: cargo
+    flags:
+      - --release
+      - --locked
+    skip: '{{ and .IsSnapshot (ne .Runtime.Goos "darwin") }}'
+    targets:
       - x86_64-apple-darwin
       - aarch64-apple-darwin
-      - x86_64-pc-windows-gnu
 
 archives:
   - id: graveyard
     ids:
-      - graveyard
+      - graveyard-core
+      - graveyard-darwin
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     formats:
       - tar.gz
@@ -44,7 +55,8 @@ changelog:
 brews:
   - name: graveyard
     ids:
-      - graveyard
+      - graveyard-core
+      - graveyard-darwin
     repository:
       owner: you
       name: homebrew-tap
