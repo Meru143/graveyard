@@ -1,5 +1,5 @@
 {
-  "name": "graveyard-linux-x64",
+  "name": "graveyard-cli-linux-x64",
   "version": "0.1.0",
   "description": "graveyard binary for linux x64",
   "license": "MIT",

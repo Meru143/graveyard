@@ -1,5 +1,5 @@
 {
-  "name": "graveyard-darwin-x64",
+  "name": "graveyard-cli-darwin-x64",
   "version": "0.1.0",
   "description": "graveyard binary for darwin x64",
   "license": "MIT",

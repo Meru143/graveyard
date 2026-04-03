@@ -1,5 +1,5 @@
 {
-  "name": "graveyard",
+  "name": "graveyard-cli",
   "version": "0.1.0",
   "description": "Find dead code across Python, JS/TS, Go, and Rust with git-aware confidence scoring.",
   "license": "MIT",
@@ -31,10 +31,10 @@
     "postpack": "node scripts/cleanup-npm-packages.js"
   },
   "optionalDependencies": {
-    "graveyard-darwin-arm64": "0.1.0",
-    "graveyard-darwin-x64": "0.1.0",
-    "graveyard-linux-arm64": "0.1.0",
-    "graveyard-linux-x64": "0.1.0",
-    "graveyard-windows-x64": "0.1.0"
+    "graveyard-cli-darwin-arm64": "0.1.0",
+    "graveyard-cli-darwin-x64": "0.1.0",
+    "graveyard-cli-linux-arm64": "0.1.0",
+    "graveyard-cli-linux-x64": "0.1.0",
+    "graveyard-cli-windows-x64": "0.1.0"
   }
 }

@@ -10,26 +10,31 @@ const args = process.argv.slice(3);
 const PACKAGES = [
   {
     workspace: "graveyard-darwin-arm64",
+    packageName: "graveyard-cli-darwin-arm64",
     archiveSuffix: "_darwin_arm64.tar.gz",
     binaryName: "graveyard"
   },
   {
     workspace: "graveyard-darwin-x64",
+    packageName: "graveyard-cli-darwin-x64",
     archiveSuffix: "_darwin_amd64.tar.gz",
     binaryName: "graveyard"
   },
   {
     workspace: "graveyard-linux-arm64",
+    packageName: "graveyard-cli-linux-arm64",
     archiveSuffix: "_linux_arm64.tar.gz",
     binaryName: "graveyard"
   },
   {
     workspace: "graveyard-linux-x64",
+    packageName: "graveyard-cli-linux-x64",
     archiveSuffix: "_linux_amd64.tar.gz",
     binaryName: "graveyard"
   },
   {
     workspace: "graveyard-windows-x64",
+    packageName: "graveyard-cli-windows-x64",
     archiveSuffix: "_windows_amd64.zip",
     binaryName: "graveyard.exe"
   }

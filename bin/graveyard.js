@@ -5,11 +5,11 @@ const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 
 const PLATFORM_PACKAGES = {
-  "darwin:arm64": "graveyard-darwin-arm64",
-  "darwin:x64": "graveyard-darwin-x64",
-  "linux:arm64": "graveyard-linux-arm64",
-  "linux:x64": "graveyard-linux-x64",
-  "win32:x64": "graveyard-windows-x64"
+  "darwin:arm64": "graveyard-cli-darwin-arm64",
+  "darwin:x64": "graveyard-cli-darwin-x64",
+  "linux:arm64": "graveyard-cli-linux-arm64",
+  "linux:x64": "graveyard-cli-linux-x64",
+  "win32:x64": "graveyard-cli-windows-x64"
 };
 
 const binaryName = process.platform === "win32" ? "graveyard.exe" : "graveyard";
