@@ -102,16 +102,16 @@ pub fn build_fqn(file: &Path, root: &Path, parts: &[&str]) -> String {
 
 #[cfg(test)]
 mod tests {
-    use std::path::Path;
+    use std::path::{Path, PathBuf};
 
     use super::{build_fqn, FindingTag, ScoreBreakdown, Symbol, SymbolKind};
 
     #[test]
     fn build_fqn_normalizes_relative_paths() {
-        let file = Path::new(r"C:\repo\src\foo.py");
-        let root = Path::new(r"C:\repo");
+        let root = PathBuf::from("repo");
+        let file = root.join("src").join("foo.py");
 
-        let fqn = build_fqn(file, root, &["MyClass", "my_method"]);
+        let fqn = build_fqn(file.as_path(), root.as_path(), &["MyClass", "my_method"]);
 
         assert_eq!(fqn, "src/foo.py::MyClass::my_method");
     }
