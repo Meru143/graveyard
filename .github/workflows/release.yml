@@ -1,6 +1,7 @@
 name: Release
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - "v*.*.*"
@@ -37,17 +38,20 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - uses: dtolnay/rust-toolchain@stable
       - uses: goto-bus-stop/setup-zig@v2
       - name: Install cargo-zigbuild
         run: cargo install cargo-zigbuild --locked --version 0.22.1
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
-          version: latest
+          version: "~> v2"
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
       - uses: actions/upload-artifact@v4
         with:
           name: goreleaser-dist
@@ -98,8 +102,6 @@ jobs:
     name: Publish to PyPI
     needs: wheels
     runs-on: ubuntu-latest
-    permissions:
-      id-token: write
     steps:
       - uses: actions/download-artifact@v4
         with:
@@ -110,6 +112,9 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           packages-dir: dist
+          user: __token__
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip-existing: true
 
   npm:
     name: Publish npm packages
@@ -117,6 +122,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v4
@@ -129,17 +135,34 @@ jobs:
           path: dist
       - name: Prepare platform packages from dist
         run: node scripts/prepare-npm-packages.js dist --dist-dir dist
-      - name: Publish platform packages
+      - name: Publish platform packages if missing
         run: |
-          npm publish --workspace npm/graveyard-darwin-arm64 --access public
-          npm publish --workspace npm/graveyard-darwin-x64 --access public
-          npm publish --workspace npm/graveyard-linux-arm64 --access public
-          npm publish --workspace npm/graveyard-linux-x64 --access public
-          npm publish --workspace npm/graveyard-windows-x64 --access public
+          publish_if_missing() {
+            name="$1"
+            version="$2"
+            shift 2
+            if npm view "${name}@${version}" version >/dev/null 2>&1; then
+              echo "Skipping ${name}@${version}; already published"
+            else
+              npm publish "$@" --access public --provenance
+            fi
+          }
+          VERSION="$(node -p "require('./package.json').version")"
+          publish_if_missing graveyard-cli-darwin-arm64 "$VERSION" --workspace npm/graveyard-darwin-arm64
+          publish_if_missing graveyard-cli-darwin-x64 "$VERSION" --workspace npm/graveyard-darwin-x64
+          publish_if_missing graveyard-cli-linux-arm64 "$VERSION" --workspace npm/graveyard-linux-arm64
+          publish_if_missing graveyard-cli-linux-x64 "$VERSION" --workspace npm/graveyard-linux-x64
+          publish_if_missing graveyard-cli-windows-x64 "$VERSION" --workspace npm/graveyard-windows-x64
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
-      - name: Publish root wrapper
-        run: npm publish --access public
+      - name: Publish root wrapper if missing
+        run: |
+          VERSION="$(node -p "require('./package.json').version")"
+          if npm view "graveyard-cli@${VERSION}" version >/dev/null 2>&1; then
+            echo "Skipping graveyard-cli@${VERSION}; already published"
+          else
+            npm publish --access public --provenance
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
 
@@ -152,7 +175,30 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
-      - name: Publish to crates.io
-        run: cargo publish --locked
+      - name: Publish to crates.io if missing
+        run: |
+          VERSION="$(python - <<'PY'
+          import tomllib
+          from pathlib import Path
+          data = tomllib.loads(Path('Cargo.toml').read_text(encoding='utf-8'))
+          print(data['package']['version'])
+          PY
+          )"
+          if python - <<'PY'
+          import json
+          import tomllib
+          import urllib.request
+          from pathlib import Path
+
+          version = tomllib.loads(Path('Cargo.toml').read_text(encoding='utf-8'))['package']['version']
+          with urllib.request.urlopen('https://crates.io/api/v1/crates/graveyard', timeout=30) as response:
+              payload = json.load(response)
+          raise SystemExit(0 if any(item['num'] == version for item in payload['versions']) else 1)
+          PY
+          then
+            echo "Skipping graveyard ${VERSION}; already published"
+          else
+            cargo publish --locked
+          fi
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}

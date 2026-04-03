@@ -60,6 +60,7 @@ brews:
     repository:
       owner: Meru143
       name: homebrew-tap
+      token: "{{ .Env.TAP_GITHUB_TOKEN }}"
     homepage: "https://github.com/Meru143/graveyard"
     description: "Find dead code across Python, JS/TS, Go, and Rust with git-aware confidence scoring."
     license: "MIT"
