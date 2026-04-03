@@ -187,9 +187,11 @@ fn main() {}
             config: PathBuf::from(".graveyard.toml"),
             verbose: 0,
         };
-        let mut config = Config::default();
-        config.baseline = Some(baseline_path);
-        config.no_cache = true;
+        let config = Config {
+            baseline: Some(baseline_path),
+            no_cache: true,
+            ..Config::default()
+        };
 
         let findings = run_scan(&args, config).expect("run_scan should succeed");
 
