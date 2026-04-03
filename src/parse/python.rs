@@ -36,7 +36,21 @@ const CALL_QUERY: &str = r#"
       ]) @reference.call
 "#;
 
+const STRING_QUERY: &str = r#"
+    (string
+      (string_content) @value) @string
+"#;
+
 pub fn extract_python(path: &Path, root: &Path, source: &[u8]) -> (Vec<Symbol>, Vec<Reference>) {
+    extract_python_with_options(path, root, source, &[])
+}
+
+pub(crate) fn extract_python_with_options(
+    path: &Path,
+    root: &Path,
+    source: &[u8],
+    ignore_decorators: &[String],
+) -> (Vec<Symbol>, Vec<Reference>) {
     let mut parser = Parser::new();
     if parser.set_language(&PY_LANGUAGE).is_err() {
         return (Vec::new(), Vec::new());
@@ -49,7 +63,13 @@ pub fn extract_python(path: &Path, root: &Path, source: &[u8]) -> (Vec<Symbol>, 
 
     let mut symbols = Vec::new();
     symbols.extend(collect_python_classes(path, root, root_node, source));
-    symbols.extend(collect_python_functions(path, root, root_node, source));
+    symbols.extend(collect_python_functions(
+        path,
+        root,
+        root_node,
+        source,
+        ignore_decorators,
+    ));
     apply_python_all_exports(root_node, source, &mut symbols);
 
     let references = collect_python_references(path, root, root_node, source);
@@ -61,6 +81,7 @@ fn collect_python_functions(
     root: &Path,
     root_node: tree_sitter::Node<'_>,
     source: &[u8],
+    ignore_decorators: &[String],
 ) -> Vec<Symbol> {
     let query = Query::new(&PY_LANGUAGE, FUNCTION_QUERY).expect("python function query is valid");
     let capture_names = query.capture_names();
@@ -101,7 +122,8 @@ fn collect_python_functions(
             line_start,
             line_end,
             is_exported: false,
-            is_test: path_is_test(path) || has_fixture_decorator(definition_node, source),
+            is_test: path_is_test(path)
+                || has_matching_decorator(definition_node, source, ignore_decorators),
         });
     }
 
@@ -227,10 +249,60 @@ fn collect_python_references(
         });
     }
 
+    references.extend(collect_python_getattr_references(path, root, root_node, source));
     references
 }
 
-fn has_fixture_decorator(node: tree_sitter::Node<'_>, source: &[u8]) -> bool {
+fn collect_python_getattr_references(
+    path: &Path,
+    root: &Path,
+    root_node: tree_sitter::Node<'_>,
+    source: &[u8],
+) -> Vec<Reference> {
+    let query = Query::new(&PY_LANGUAGE, STRING_QUERY).expect("python string query is valid");
+    let capture_names = query.capture_names();
+    let mut cursor = QueryCursor::new();
+    let mut references = Vec::new();
+
+    let mut matches = cursor.matches(&query, root_node, source);
+    while let Some(query_match) = matches.next() {
+        let value_node = query_match.captures.iter().find_map(|capture| {
+            (capture_names[capture.index as usize] == "value").then_some(capture.node)
+        });
+        let string_node = query_match.captures.iter().find_map(|capture| {
+            (capture_names[capture.index as usize] == "string").then_some(capture.node)
+        });
+
+        let (Some(value_node), Some(string_node)) = (value_node, string_node) else {
+            continue;
+        };
+        let Some(target_name) = node_text(value_node, source) else {
+            continue;
+        };
+        if !is_identifier_like(&target_name) {
+            continue;
+        }
+
+        let Some(call_node) = enclosing_getattr_call(string_node, source) else {
+            continue;
+        };
+
+        references.push(Reference {
+            source_fqn: source_fqn_for_node(path, root, call_node, source),
+            target_name,
+            file: path.to_path_buf(),
+            line: line_span(call_node).0,
+        });
+    }
+
+    references
+}
+
+fn has_matching_decorator(
+    node: tree_sitter::Node<'_>,
+    source: &[u8],
+    ignore_decorators: &[String],
+) -> bool {
     let Some(parent) = node.parent() else {
         return false;
     };
@@ -242,7 +314,12 @@ fn has_fixture_decorator(node: tree_sitter::Node<'_>, source: &[u8]) -> bool {
         return false;
     };
 
-    text.contains("pytest.fixture") || text.contains("@fixture")
+    let normalized = text.replace(' ', "");
+    ["pytest.fixture", "app.route"]
+        .into_iter()
+        .chain(ignore_decorators.iter().map(String::as_str))
+        .map(|pattern| pattern.trim_start_matches('@'))
+        .any(|pattern| normalized.contains(pattern))
 }
 
 fn extract_string_names(text: &str) -> Vec<String> {
@@ -268,13 +345,43 @@ fn extract_string_names(text: &str) -> Vec<String> {
     names
 }
 
+fn enclosing_getattr_call<'tree>(
+    node: tree_sitter::Node<'tree>,
+    source: &[u8],
+) -> Option<tree_sitter::Node<'tree>> {
+    let mut current = node.parent();
+
+    while let Some(parent) = current {
+        if parent.kind() == "call" {
+            let function_node = parent.child_by_field_name("function")?;
+            if node_text(function_node, source).as_deref() == Some("getattr") {
+                return Some(parent);
+            }
+        }
+
+        current = parent.parent();
+    }
+
+    None
+}
+
+fn is_identifier_like(value: &str) -> bool {
+    let mut chars = value.chars();
+    let Some(first) = chars.next() else {
+        return false;
+    };
+
+    (first.is_ascii_alphabetic() || first == '_')
+        && chars.all(|ch| ch.is_ascii_alphanumeric() || ch == '_')
+}
+
 #[cfg(test)]
 mod tests {
     use std::path::Path;
 
     use tree_sitter::Parser;
 
-    use super::{extract_python, PY_LANGUAGE};
+    use super::{extract_python, extract_python_with_options, PY_LANGUAGE};
     use crate::parse::types::SymbolKind;
 
     #[test]
@@ -326,6 +433,37 @@ __all__ = ["helper"]
             references
                 .iter()
                 .any(|reference| reference.target_name == "helper")
+        );
+    }
+
+    #[test]
+    fn extract_python_respects_configured_decorators_and_getattr_strings() {
+        let source = br#"
+@custom.route("/hello")
+def handler():
+    return getattr(service, "dynamic_handler")()
+
+def dynamic_handler():
+    return 1
+"#;
+
+        let decorators = vec!["custom.route".to_string()];
+        let (symbols, references) = extract_python_with_options(
+            Path::new("src/example.py"),
+            Path::new("."),
+            source,
+            &decorators,
+        );
+
+        assert!(
+            symbols
+                .iter()
+                .any(|symbol| symbol.name == "handler" && symbol.is_test)
+        );
+        assert!(
+            references
+                .iter()
+                .any(|reference| reference.target_name == "dynamic_handler")
         );
     }
 }

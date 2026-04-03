@@ -61,6 +61,10 @@ const CALL_QUERY: &str = r#"
     ]
 "#;
 
+const EXPORT_ALL_QUERY: &str = r#"
+    (export_statement) @export
+"#;
+
 pub fn extract_javascript(
     path: &Path,
     root: &Path,
@@ -284,7 +288,67 @@ fn collect_references(
         });
     }
 
+    references.extend(collect_export_star_references(path, root, root_node, source, language));
     references
+}
+
+fn collect_export_star_references(
+    path: &Path,
+    root: &Path,
+    root_node: Node<'_>,
+    source: &[u8],
+    language: &tree_sitter::Language,
+) -> Vec<Reference> {
+    let query = Query::new(language, EXPORT_ALL_QUERY).expect("export-all query is valid");
+    let capture_names = query.capture_names();
+    let mut cursor = QueryCursor::new();
+    let mut references = Vec::new();
+
+    let mut matches = cursor.matches(&query, root_node, source);
+    while let Some(query_match) = matches.next() {
+        let export_node = query_match.captures.iter().find_map(|capture| {
+            (capture_names[capture.index as usize] == "export").then_some(capture.node)
+        });
+        let Some(export_node) = export_node else {
+            continue;
+        };
+
+        let Some(export_text) = node_text(export_node, source) else {
+            continue;
+        };
+        if !export_text.starts_with("export *") {
+            continue;
+        }
+
+        let Some(module_path) = extract_quoted_value(&export_text) else {
+            continue;
+        };
+
+        references.push(Reference {
+            source_fqn: build_fqn(path, root, &[]),
+            target_name: module_path,
+            file: path.to_path_buf(),
+            line: line_span(export_node).0,
+        });
+    }
+
+    references
+}
+
+fn extract_quoted_value(text: &str) -> Option<String> {
+    let mut quote = None;
+    let mut value = String::new();
+
+    for ch in text.chars() {
+        match quote {
+            Some(active) if ch == active => return Some(value),
+            Some(_) => value.push(ch),
+            None if ch == '"' || ch == '\'' => quote = Some(ch),
+            None => {}
+        }
+    }
+
+    None
 }
 
 #[cfg(test)]
@@ -340,6 +404,20 @@ class Box {}
             references
                 .iter()
                 .any(|reference| reference.target_name == "helper")
+        );
+    }
+
+    #[test]
+    fn extract_javascript_records_export_star_reexports() {
+        let source = br#"export * from "./utils";"#;
+
+        let (_, references) =
+            extract_javascript(Path::new("src/example.js"), Path::new("."), source);
+
+        assert!(
+            references
+                .iter()
+                .any(|reference| reference.target_name == "./utils")
         );
     }
 }

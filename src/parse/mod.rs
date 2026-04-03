@@ -22,7 +22,7 @@ use crate::walker::Language;
 use self::cache::ParseCache;
 use self::go::extract_go;
 use self::javascript::extract_javascript;
-use self::python::extract_python;
+use self::python::{extract_python, extract_python_with_options};
 use self::rust_lang::extract_rust;
 use self::types::{build_fqn, Reference, Symbol};
 use self::typescript::extract_typescript;
@@ -32,7 +32,7 @@ pub fn parse_all(
     root: &Path,
     cache: &ParseCache,
     git_head: &str,
-    _config: &Config,
+    config: &Config,
 ) -> (Vec<Symbol>, Vec<Reference>) {
     let progress = ProgressBar::new(files.len() as u64);
     if let Ok(style) =
@@ -54,7 +54,7 @@ pub fn parse_all(
 
             let result = catch_unwind(AssertUnwindSafe(|| {
                 let source = fs::read(path).map_err(|error| error.to_string())?;
-                let parsed = dispatch_extract(path, root, &source, *language);
+                let parsed = dispatch_extract(path, root, &source, *language, config);
                 cache.set(&cache_key, &parsed.0, &parsed.1);
                 Ok::<_, String>(parsed)
             }));
@@ -175,9 +175,16 @@ fn dispatch_extract(
     root: &Path,
     source: &[u8],
     language: Language,
+    config: &Config,
 ) -> (Vec<Symbol>, Vec<Reference>) {
     match language {
-        Language::Python => extract_python(path, root, source),
+        Language::Python => {
+            if config.ignore.decorators.is_empty() {
+                extract_python(path, root, source)
+            } else {
+                extract_python_with_options(path, root, source, &config.ignore.decorators)
+            }
+        }
         Language::JavaScript => extract_javascript(path, root, source),
         Language::TypeScript => extract_typescript(
             path,
