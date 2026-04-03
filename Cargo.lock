@@ -526,6 +526,7 @@ dependencies = [
  "ignore",
  "indicatif",
  "insta",
+ "once_cell",
  "owo-colors",
  "path-slash",
  "petgraph",
