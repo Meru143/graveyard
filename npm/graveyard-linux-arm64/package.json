@@ -3,10 +3,10 @@
   "version": "0.1.0",
   "description": "graveyard binary for linux arm64",
   "license": "MIT",
-  "homepage": "https://github.com/you/graveyard",
+  "homepage": "https://github.com/Meru143/graveyard",
   "repository": {
     "type": "git",
-    "url": "https://github.com/you/graveyard.git"
+    "url": "https://github.com/Meru143/graveyard.git"
   },
   "os": [
     "linux"

@@ -7,7 +7,7 @@
 Install Rust 1.75 or newer, Git, and the platform toolchain required to build `git2` with vendored `libgit2`. Python and Node are only needed when working on the release packaging paths.
 
 ```bash
-git clone https://github.com/you/graveyard.git
+git clone https://github.com/Meru143/graveyard.git
 cd graveyard
 cargo build
 ```

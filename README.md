@@ -1,12 +1,13 @@
 # graveyard
 
-[![CI](https://github.com/you/graveyard/actions/workflows/ci.yml/badge.svg)](https://github.com/you/graveyard/actions/workflows/ci.yml)
+[![CI](https://github.com/Meru143/graveyard/actions/workflows/ci.yml/badge.svg)](https://github.com/Meru143/graveyard/actions/workflows/ci.yml)
+[![GitHub stars](https://img.shields.io/github/stars/Meru143/graveyard?style=social)](https://github.com/Meru143/graveyard/stargazers)
 [![crates.io](https://img.shields.io/crates/v/graveyard.svg)](https://crates.io/crates/graveyard)
 [![PyPI](https://img.shields.io/pypi/v/graveyard.svg)](https://pypi.org/project/graveyard/)
 [![npm](https://img.shields.io/npm/v/graveyard.svg)](https://www.npmjs.com/package/graveyard)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-`graveyard` scans Python, JavaScript, TypeScript, Go, and Rust repositories for dead code in a single pass, then ranks every finding with a git-history-weighted confidence score. It exists because AI coding agents make cross-language dead code cheaper to create than to notice, and the existing toolchain still forces teams to stitch together language-specific scanners with no shared scoring model.
+`graveyard` finds dead code across Python, JavaScript, TypeScript, Go, and Rust in a single pass, then ranks every finding with git-aware confidence scoring. It exists because AI coding agents make cross-language dead code cheaper to create than to notice, and the existing toolchain still forces teams to stitch together language-specific scanners with no shared scoring model.
 
 ## What is graveyard?
 

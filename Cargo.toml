@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2021"
 rust-version = "1.75"
 license = "MIT"
-description = "Scan polyglot repositories for dead code and rank findings with git-history-weighted confidence."
-repository = "https://github.com/you/graveyard"
-homepage = "https://github.com/you/graveyard"
+description = "Find dead code across Python, JS/TS, Go, and Rust with git-aware confidence scoring."
+repository = "https://github.com/Meru143/graveyard"
+homepage = "https://github.com/Meru143/graveyard"
 keywords = ["dead-code", "static-analysis", "linter"]
 categories = ["development-tools::testing", "command-line-utilities"]
 

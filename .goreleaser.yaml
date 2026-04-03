@@ -58,10 +58,10 @@ brews:
       - graveyard-core
       - graveyard-darwin
     repository:
-      owner: you
+      owner: Meru143
       name: homebrew-tap
-    homepage: "https://github.com/you/graveyard"
-    description: "Scan polyglot repositories for dead code and rank findings with git-history-weighted confidence."
+    homepage: "https://github.com/Meru143/graveyard"
+    description: "Find dead code across Python, JS/TS, Go, and Rust with git-aware confidence scoring."
     license: "MIT"
     test: |
       system "#{bin}/graveyard", "--version"

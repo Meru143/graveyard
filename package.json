@@ -1,12 +1,12 @@
 {
   "name": "graveyard",
   "version": "0.1.0",
-  "description": "Scan polyglot repositories for dead code and rank findings with git-history-weighted confidence.",
+  "description": "Find dead code across Python, JS/TS, Go, and Rust with git-aware confidence scoring.",
   "license": "MIT",
-  "homepage": "https://github.com/you/graveyard",
+  "homepage": "https://github.com/Meru143/graveyard",
   "repository": {
     "type": "git",
-    "url": "https://github.com/you/graveyard.git"
+    "url": "https://github.com/Meru143/graveyard.git"
   },
   "bin": {
     "graveyard": "./bin/graveyard.js"
