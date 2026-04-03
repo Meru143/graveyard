@@ -1,0 +1,69 @@
+---
+source: tests/test_output_formats.rs
+expression: value
+---
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "runs": [
+    {
+      "results": [
+        {
+          "level": "warning",
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///./src/main.rs"
+                },
+                "region": {
+                  "startLine": 2
+                }
+              }
+            }
+          ],
+          "message": {
+            "text": "src/main.rs::dead_public appears to be dead code (confidence 0.74)"
+          },
+          "ruleId": "GY002"
+        }
+      ],
+      "tool": {
+        "driver": {
+          "name": "graveyard",
+          "rules": [
+            {
+              "id": "GY001",
+              "name": "Dead",
+              "shortDescription": {
+                "text": "Symbol appears unreachable"
+              }
+            },
+            {
+              "id": "GY002",
+              "name": "ExportedUnused",
+              "shortDescription": {
+                "text": "Exported symbol has no internal callers"
+              }
+            },
+            {
+              "id": "GY003",
+              "name": "InDeadCycle",
+              "shortDescription": {
+                "text": "Symbol is only referenced within a dead cycle"
+              }
+            },
+            {
+              "id": "GY004",
+              "name": "TestOnly",
+              "shortDescription": {
+                "text": "Symbol is only referenced from tests"
+              }
+            }
+          ],
+          "version": "0.1.0"
+        }
+      }
+    }
+  ],
+  "version": "2.1.0"
+}

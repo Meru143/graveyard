@@ -1,0 +1,31 @@
+---
+source: tests/test_output_formats.rs
+expression: value
+---
+{
+  "findings": [
+    {
+      "confidence": 0.74,
+      "deadness_age_days": 400.0,
+      "file": "./src/main.rs",
+      "in_degree": 0,
+      "kind": "function",
+      "language": "rust",
+      "line_end": 2,
+      "line_start": 2,
+      "score_breakdown": {
+        "age_factor": 0.5866175789173301,
+        "churn_factor": 1.0,
+        "ref_factor": 1.0,
+        "scope_factor": 0.4
+      },
+      "symbol_fqn": "src/main.rs::dead_public",
+      "symbol_name": "dead_public",
+      "tag": "exported_unused"
+    }
+  ],
+  "graveyard_version": "0.1.0",
+  "min_confidence": 0.5,
+  "scanned_at": "[timestamp]",
+  "total_findings": 1
+}

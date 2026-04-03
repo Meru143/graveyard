@@ -1,0 +1,6 @@
+---
+source: tests/test_output_formats.rs
+expression: sanitized
+---
+fqn,name,file,line_start,line_end,language,kind,tag,confidence,deadness_age_days,in_degree
+src/main.rs::dead_public,dead_public,./src/main.rs,2,2,rust,function,exported_unused,0.74,400.00,0
