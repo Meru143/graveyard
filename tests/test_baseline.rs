@@ -1,8 +1,13 @@
 use std::fs;
+use std::process::Command as ProcessCommand;
 
 use assert_cmd::Command;
 use serde_json::Value;
 use tempfile::TempDir;
+
+mod common;
+
+use common::TmpGitRepo;
 
 fn write_rust_fixture_repo(source: &str) -> TempDir {
     let temp_dir = TempDir::new().expect("temp dir should exist");
@@ -124,4 +129,20 @@ fn main() {}
         !stdout.contains("old_dead"),
         "diff output should suppress baseline findings: {stdout}"
     );
+}
+
+#[test]
+fn tmp_git_repo_commits_backdated_files() {
+    let repo = TmpGitRepo::new();
+    repo.commit_file("src/main.rs", "fn main() {}\n", 30);
+
+    let output = ProcessCommand::new("git")
+        .args(["log", "--format=%ad", "--date=short", "-1"])
+        .current_dir(repo.path())
+        .output()
+        .expect("git log should execute");
+
+    assert!(output.status.success(), "git log should succeed: {output:?}");
+    assert!(repo.path().join("src/main.rs").exists());
+    assert!(!String::from_utf8_lossy(&output.stdout).trim().is_empty());
 }
