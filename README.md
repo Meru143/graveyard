@@ -2,8 +2,8 @@
 
 [![CI](https://github.com/Meru143/graveyard/actions/workflows/ci.yml/badge.svg)](https://github.com/Meru143/graveyard/actions/workflows/ci.yml)
 [![GitHub stars](https://img.shields.io/github/stars/Meru143/graveyard?style=social)](https://github.com/Meru143/graveyard/stargazers)
-[![crates.io pending](https://img.shields.io/badge/crates.io-publishing_soon-informational)](https://crates.io/)
-[![PyPI pending](https://img.shields.io/badge/PyPI-publishing_soon-informational)](https://pypi.org/)
+[![crates.io](https://img.shields.io/crates/v/graveyard.svg)](https://crates.io/crates/graveyard)
+[![PyPI](https://img.shields.io/pypi/v/graveyard.svg)](https://pypi.org/project/graveyard/)
 [![npm pending](https://img.shields.io/badge/npm-graveyard--cli_in_progress-informational)](https://www.npmjs.com/package/graveyard-cli)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
