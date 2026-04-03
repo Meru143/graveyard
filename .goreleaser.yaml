@@ -55,8 +55,7 @@ changelog:
 brews:
   - name: graveyard
     ids:
-      - graveyard-core
-      - graveyard-darwin
+      - graveyard
     repository:
       owner: Meru143
       name: homebrew-tap

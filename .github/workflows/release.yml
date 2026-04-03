@@ -69,16 +69,16 @@ jobs:
           - name: linux-x64
             os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
-            manylinux: "2014"
+            manylinux: "2_28"
           - name: linux-arm64
             os: ubuntu-latest
             target: aarch64-unknown-linux-gnu
-            manylinux: "2014"
+            manylinux: "2_28"
           - name: macos-x64
-            os: macos-13
+            os: macos-15-intel
             target: x86_64-apple-darwin
           - name: macos-arm64
-            os: macos-latest
+            os: macos-15
             target: aarch64-apple-darwin
           - name: windows-x64
             os: windows-latest
@@ -89,9 +89,10 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           command: build
+          maturin-version: v1.12.6
           target: ${{ matrix.target }}
           manylinux: ${{ matrix.manylinux }}
-          args: --release --out dist
+          args: --release --out dist --compatibility pypi
       - uses: actions/upload-artifact@v4
         with:
           name: wheels-${{ matrix.name }}
