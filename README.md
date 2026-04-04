@@ -29,7 +29,7 @@ uvx graveyard --version
 
 ```bash
 npm install -g graveyard-cli
-npx graveyard --version
+graveyard --version
 ```
 
 ### cargo
@@ -42,6 +42,7 @@ graveyard --version
 ### Homebrew
 
 ```bash
+brew tap Meru143/homebrew-tap
 brew install graveyard
 graveyard --version
 ```
@@ -140,7 +141,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install graveyard
@@ -150,6 +151,8 @@ jobs:
 ```
 
 If you do not need a ratchet, replace the final command with `graveyard scan --ci --min-confidence 0.8`. SARIF output is available through `graveyard scan --format sarif --output graveyard.sarif` when you want to upload findings into GitHub code scanning.
+
+This repository keeps its own GitHub Actions split into two workflows. `CI` runs on pull requests into `main` and on pushes to `main`, then reports a single protected summary check named `CI` after the matrix finishes. `Release` does not run on ordinary commits; it only runs for semver tags such as `v0.1.2` or through manual dispatch.
 
 ## Configuration
 

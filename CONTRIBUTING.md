@@ -1,6 +1,6 @@
 # Contributing
 
-`graveyard` is a Rust CLI with a strict quality gate. Changes should land with tests, pass the documented checks locally, and keep the command-line interface aligned with the PRD and TODO documents in the repository root.
+`graveyard` is a Rust CLI with a strict quality gate. Changes should land with tests, pass the documented checks locally, and keep the command-line interface aligned with the shipped documentation and workflow contracts in this repository.
 
 ## Development Setup
 
@@ -21,6 +21,8 @@ make test
 make build
 make audit
 ```
+
+The repository uses two GitHub Actions workflows. `CI` runs for pull requests targeting `main` and for pushes to `main`, and branch protection only requires the final summary job named `CI`. `Release` runs only for semver tags such as `v0.1.2` or through manual dispatch, so ordinary commits do not publish packages.
 
 ## Local Verification
 
@@ -53,6 +55,8 @@ Keep each pull request scoped to one logical change. Update tests and documentat
 
 Pull requests should describe the user-visible behavior change, the verification commands you ran, and any risks or follow-up work. If a change affects parsing, scoring, CI, or packaging, include a note about the fixture or workflow coverage that protects it.
 
+Avoid pushing directly to `main` unless you are intentionally updating protected branch state as a maintainer. The normal path is a pull request so the full matrix runs once on the branch and once on the merged `main` commit.
+
 ## Project Expectations
 
-`graveyard` is read-only by design. Do not add auto-delete behavior, editor integrations, network services, or language targets that are explicitly listed as future scope in the PRD. Keep the implementation aligned with the current command surface and distribution model unless the TODO or PRD changes first.
+`graveyard` is read-only by design. Do not add auto-delete behavior, editor integrations, network services, or language targets that are out of scope for the current release. Keep the implementation aligned with the current command surface and distribution model unless the documented project scope changes first.
