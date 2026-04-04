@@ -133,6 +133,7 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
       - uses: actions/download-artifact@v5
         with:
           name: goreleaser-dist
@@ -245,6 +246,7 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
       - name: Smoke test crates.io install
         if: matrix.channel == 'cargo'
         shell: bash

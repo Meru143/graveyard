@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-04-04
+
+### Fixed
+
+- Disabled `actions/setup-node@v6` package-manager caching in the release workflow so npm publishing and npm install smoke tests no longer require a lockfile.
+- Re-cut the release after `0.1.1` partially published crates.io and PyPI but failed before npm publication.
+
 ## [0.1.1] - 2026-04-04
 
 ### Changed
