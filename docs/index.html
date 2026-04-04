@@ -125,33 +125,41 @@ $ graveyard baseline diff --baseline .graveyard-baseline.json --ci
 
         <section class="section">
           <div class="section-intro">
-            <p class="eyebrow">Trust signals</p>
-            <h2>Shipped through the channels developers already use.</h2>
+            <p class="eyebrow">What it looks like</p>
+            <h2>From local scan output to CI ratchet in two commands.</h2>
             <p>
-              The project is published on crates.io, PyPI, npm, and Homebrew, then
-              verified in GitHub Actions across Rust stable and beta on Linux, macOS,
-              and Windows. That install surface matters because the easiest tool to try
-              is the one people keep recommending.
+              The install surface matters, but the proof is the workflow: scan once,
+              save a baseline, then only fail the build when a pull request adds new
+              dead code. The examples below show the parts teams actually wire into
+              day-to-day review and CI.
             </p>
           </div>
 
-          <div class="stats-grid">
-            <div class="stat-card">
-              <strong>4</strong>
-              <span>package ecosystems</span>
-            </div>
-            <div class="stat-card">
-              <strong>5</strong>
-              <span>supported languages in v1</span>
-            </div>
-            <div class="stat-card">
-              <strong>3</strong>
-              <span>output modes for automation</span>
-            </div>
-            <div class="stat-card">
-              <strong>3</strong>
-              <span>operating systems in CI</span>
-            </div>
+          <div class="proof-grid">
+            <article class="proof-card">
+              <h3>Local scan</h3>
+              <pre><code>$ graveyard scan --format table --min-confidence 0.80
+
+0.94  ExportedUnused  src/lib.rs:42         legacy::old_api
+0.88  Dead            services/foo.py:17    cleanup_task
+
+Found 2 dead symbol(s)</code></pre>
+            </article>
+            <article class="proof-card">
+              <h3>CI ratchet</h3>
+              <pre><code>$ graveyard baseline diff --baseline .graveyard-baseline.json --ci
+
+baseline findings: 18
+new findings: 1
+exit code: 1</code></pre>
+            </article>
+            <article class="proof-card">
+              <h3>Code scanning handoff</h3>
+              <pre><code>$ graveyard scan --format sarif --output graveyard.sarif
+$ upload-sarif graveyard.sarif
+
+3 findings surfaced in GitHub code scanning</code></pre>
+            </article>
           </div>
         </section>
 
