@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-04-04
+
+### Changed
+
+- Hardened GitHub Actions around a stable summary `CI` check so branch protection can require a single status instead of the full matrix.
+- Upgraded workflow actions toward Node 24 compatibility and made coverage uploads resilient to transient Codecov failures.
+- Added post-publish release smoke tests for `cargo install graveyard`, `pip install graveyard`, and `npm install -g graveyard-cli`.
+
 ## [0.1.0] - 2026-04-03
 
 ### Added

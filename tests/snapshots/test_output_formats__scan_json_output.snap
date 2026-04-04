@@ -24,7 +24,7 @@ expression: value
       "tag": "exported_unused"
     }
   ],
-  "graveyard_version": "0.1.0",
+  "graveyard_version": "0.1.1",
   "min_confidence": 0.5,
   "scanned_at": "[timestamp]",
   "total_findings": 1

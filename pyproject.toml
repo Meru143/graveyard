@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "graveyard"
-version = "0.1.0"
+version = "0.1.1"
 description = "Find dead code across Python, JS/TS, Go, and Rust with git-aware confidence scoring."
 readme = "README.md"
 requires-python = ">=3.8"
