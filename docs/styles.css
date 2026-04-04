@@ -174,7 +174,8 @@ pre {
 
 .terminal-card {
   overflow: hidden;
-  align-self: start;
+  align-self: center;
+  height: fit-content;
   padding: 12px;
 }
 
@@ -213,9 +214,9 @@ pre {
 
 .terminal-card pre {
   margin: 0;
-  padding: 18px 22px 24px;
+  padding: 20px 24px 26px;
   color: #f7f0e4;
-  font-size: 0.88rem;
+  font-size: 0.92rem;
   line-height: 1.7;
   overflow-x: auto;
 }
