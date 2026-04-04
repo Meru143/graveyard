@@ -3,15 +3,18 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>graveyard | Polyglot dead-code scanner</title>
+    <title>graveyard | One dead-code scanner for mixed-language repos</title>
     <meta
       name="description"
-      content="Find dead code across Python, JS/TS, Go, and Rust with git-aware confidence scoring, SARIF output, and baseline ratchets for CI."
+      content="Find dead code across Python, JS/TS, Go, and Rust with one scan, git-aware confidence scoring, and baseline ratchets for CI."
     />
-    <meta property="og:title" content="graveyard | Polyglot dead-code scanner" />
+    <meta
+      property="og:title"
+      content="graveyard | One dead-code scanner for mixed-language repos"
+    />
     <meta
       property="og:description"
-      content="Scan a repo once, rank findings with git history, and ship dead-code checks through table, JSON, CSV, or SARIF output."
+      content="Stop stitching together separate dead-code tools. graveyard scans a mixed-language repo once, ranks findings with git history, and ships a CI-safe baseline diff."
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://meru143.github.io/graveyard/" />
@@ -28,7 +31,8 @@
       <header class="site-header">
         <a class="wordmark" href="https://github.com/Meru143/graveyard">graveyard</a>
         <nav class="site-nav">
-          <a href="#proof">Proof</a>
+          <a href="#why">Why</a>
+          <a href="#compare">Compare</a>
           <a href="#install">Install</a>
           <a href="#ci">CI</a>
           <a href="https://github.com/Meru143/graveyard">GitHub</a>
@@ -38,12 +42,12 @@
       <main>
         <section class="hero">
           <div class="hero-copy">
-            <p class="eyebrow">Polyglot dead-code scanning for shipping teams</p>
-            <h1>Find dead code across Python, JS/TS, Go, and Rust.</h1>
+            <p class="eyebrow">Mixed-language dead-code scanning</p>
+            <h1>One dead-code scanner for mixed-language repos.</h1>
             <p class="hero-body">
-              <code>graveyard</code> walks a repository once, builds a cross-language
-              reference graph, folds in git history, and ranks every finding with a
-              confidence score you can actually use in CI.
+              <code>graveyard</code> scans Python, JS/TS, Go, and Rust in one pass,
+              ranks findings with git-aware confidence, and gives teams a CI-safe
+              baseline diff instead of four disconnected tools and a cleanup freeze.
             </p>
             <div class="hero-actions">
               <a class="button primary" href="https://github.com/Meru143/graveyard">
@@ -52,12 +56,11 @@
               <a class="button secondary" href="#install">Install 0.1.2</a>
             </div>
             <div class="proof-rail">
-              <span>crates.io</span>
-              <span>PyPI</span>
-              <span>npm</span>
-              <span>Homebrew</span>
+              <span>Python + JS/TS + Go + Rust</span>
+              <span>git-aware confidence</span>
+              <span>baseline diff --ci</span>
               <span>JSON / CSV / SARIF</span>
-              <span>baseline ratchet</span>
+              <span>crates.io / PyPI / npm / Homebrew</span>
             </div>
           </div>
 
@@ -68,7 +71,7 @@
                 <span></span>
                 <span></span>
               </div>
-              <pre><code>$ graveyard scan --ci --min-confidence 0.80
+              <pre><code>$ graveyard scan --min-age 30d --min-confidence 0.80
 
 CONFIDENCE  TAG             AGE        LOCATION               FQN
 0.94        ExportedUnused  1.1 years  src/lib.rs:42          src/lib.rs::legacy::old_api
@@ -81,45 +84,110 @@ $ graveyard baseline diff --baseline .graveyard-baseline.json --ci
           </aside>
         </section>
 
-        <section id="proof" class="section">
+        <section class="section">
           <div class="section-intro">
-            <p class="eyebrow">Why teams switch</p>
-            <h2>One tool instead of five disconnected reports.</h2>
+            <p class="eyebrow">Demo</p>
+            <h2>See the workflow in one short loop.</h2>
             <p>
-              Most dead-code tooling stops at one language, no history, and no story for
-              CI adoption. <code>graveyard</code> is built around the workflows that make
-              teams keep a scanner after the launch week: a single pass across a polyglot
-              repo, git-aware ranking, baseline ratchets, and SARIF for code scanning.
+              The demo shows the two commands that matter most for adoption: a ranked
+              scan of the current repo state, then a baseline diff that isolates only
+              newly introduced dead code for CI.
+            </p>
+          </div>
+
+          <div class="demo-panel">
+            <img
+              src="./assets/graveyard-demo.gif"
+              alt="Animated terminal demo of graveyard scan followed by baseline diff in CI mode"
+            />
+          </div>
+        </section>
+
+        <section id="why" class="section">
+          <div class="section-intro">
+            <p class="eyebrow">Why it exists</p>
+            <h2>Stop stitching together dead-code tools per language.</h2>
+            <p>
+              AI coding agents make stale code faster to create than to notice. Most
+              dead-code tooling still assumes one language at a time, which leaves
+              mixed-language repos juggling separate scanners, separate ignore rules,
+              and separate CI policies. <code>graveyard</code> is the single workflow
+              for teams that want one report they can trust.
             </p>
           </div>
 
           <div class="card-grid">
             <article class="feature-card">
-              <h3>Single-pass repo scan</h3>
+              <h3>One pass across the repo</h3>
               <p>
                 Manifest-aware walking covers Python, JavaScript, TypeScript, Go, and
                 Rust without splitting work across multiple linters.
               </p>
             </article>
             <article class="feature-card">
-              <h3>Git-aware ranking</h3>
+              <h3>One ranking model</h3>
               <p>
                 Findings are scored with deadness age, reference count, scope, and
-                recent churn so exported APIs and fresh code do not swamp the queue.
+                recent churn so fresh work and public APIs do not drown out the queue.
               </p>
             </article>
             <article class="feature-card">
-              <h3>CI ratchet built in</h3>
+              <h3>One CI adoption path</h3>
               <p>
                 Save a baseline once, then fail the build only when a pull request
                 introduces new dead code instead of inheriting the whole backlog.
               </p>
             </article>
             <article class="feature-card">
-              <h3>Output that plugs in</h3>
+              <h3>One output surface</h3>
               <p>
-                Use table output locally, JSON or CSV for automation, and SARIF when you
+                Use the table locally, JSON or CSV in automation, and SARIF when you
                 want findings surfaced inside GitHub code scanning.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section id="compare" class="section">
+          <div class="section-intro">
+            <p class="eyebrow">Comparison</p>
+            <h2>The wedge is mixed-language repos, not every repo.</h2>
+            <p>
+              The fastest way to make a new developer tool trustworthy is to be candid
+              about when something else is a better fit. <code>graveyard</code> is not
+              trying to replace every dead-code or dependency tool. It is the right
+              choice when the repository crosses language boundaries and the team wants
+              one dead-code workflow instead of several.
+            </p>
+          </div>
+
+          <div class="card-grid">
+            <article class="feature-card">
+              <h3>Use <code>vulture</code></h3>
+              <p>
+                When the problem is Python-only dead code, a focused single-language
+                tool can be the cleanest answer.
+              </p>
+            </article>
+            <article class="feature-card">
+              <h3>Use <code>knip</code></h3>
+              <p>
+                When the repo is centered on JavaScript or TypeScript dependency and
+                export cleanup, <code>knip</code> is a strong fit.
+              </p>
+            </article>
+            <article class="feature-card">
+              <h3>Use <code>cargo-machete</code></h3>
+              <p>
+                When you need unused Rust dependency pruning, use the tool built for
+                that job. <code>graveyard</code> works at the source-code layer.
+              </p>
+            </article>
+            <article class="feature-card">
+              <h3>Use <code>graveyard</code></h3>
+              <p>
+                When the repo mixes Python, JS/TS, Go, and Rust and the team wants one
+                scan, one ranking model, and one CI ratchet.
               </p>
             </article>
           </div>
@@ -207,9 +275,10 @@ graveyard --version</code></pre>
             <p class="eyebrow">CI adoption</p>
             <h2>Start with a baseline, then only fail on new dead code.</h2>
             <p>
-              This is the wedge that makes a scanner feel realistic in an existing codebase.
-              You do not have to fix an old backlog in one merge. Save a baseline once,
-              then let pull requests earn trust by keeping the number from growing.
+              This is the wedge that makes a scanner feel realistic in an existing
+              codebase. You do not have to fix an old backlog in one merge. Save a
+              baseline once, then let pull requests earn trust by keeping the number
+              from growing.
             </p>
           </div>
 
