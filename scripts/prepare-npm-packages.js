@@ -62,7 +62,7 @@ function copyBinary(sourcePath, destinationPath) {
 
 function removeIfExists(filePath) {
   if (fs.existsSync(filePath)) {
-    fs.rmSync(filePath, { force: true });
+    fs.rmSync(filePath, { force: true, recursive: true });
   }
 }
 
