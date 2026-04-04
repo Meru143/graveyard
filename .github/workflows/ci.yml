@@ -11,6 +11,9 @@ on:
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   fmt:
     name: Format
@@ -131,3 +134,27 @@ jobs:
           files: lcov.info
           use_oidc: true
           fail_ci_if_error: false
+
+  gate:
+    name: CI
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    needs:
+      - fmt
+      - lint
+      - test
+      - build
+      - audit
+      - deny
+      - coverage
+    steps:
+      - name: Verify all CI jobs succeeded
+        shell: bash
+        run: |
+          test "${{ needs.fmt.result }}" = "success"
+          test "${{ needs.lint.result }}" = "success"
+          test "${{ needs.test.result }}" = "success"
+          test "${{ needs.build.result }}" = "success"
+          test "${{ needs.audit.result }}" = "success"
+          test "${{ needs.deny.result }}" = "success"
+          test "${{ needs.coverage.result }}" = "success"

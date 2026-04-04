@@ -9,6 +9,9 @@ on:
 permissions:
   contents: read
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   verify:
     name: Verify (${{ matrix.os }})
@@ -104,7 +107,7 @@ jobs:
     needs: wheels
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           pattern: wheels-*
           merge-multiple: true
@@ -126,11 +129,11 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
           registry-url: https://registry.npmjs.org
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: goreleaser-dist
           path: dist
@@ -203,3 +206,63 @@ jobs:
           fi
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  smoke-install:
+    name: Install smoke (${{ matrix.channel }})
+    needs:
+      - cargo
+      - publish-pypi
+      - npm
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        channel:
+          - cargo
+          - pypi
+          - npm
+    steps:
+      - uses: actions/checkout@v5
+      - name: Read release version
+        id: version
+        shell: bash
+        run: |
+          echo "value=$(python3 - <<'PY'
+          import tomllib
+          from pathlib import Path
+          data = tomllib.loads(Path('Cargo.toml').read_text(encoding='utf-8'))
+          print(data['package']['version'])
+          PY
+          )" >> "$GITHUB_OUTPUT"
+      - uses: dtolnay/rust-toolchain@stable
+        if: matrix.channel == 'cargo'
+      - uses: actions/setup-python@v6
+        if: matrix.channel == 'pypi'
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v6
+        if: matrix.channel == 'npm'
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - name: Smoke test crates.io install
+        if: matrix.channel == 'cargo'
+        shell: bash
+        run: |
+          cargo install graveyard --version "${{ steps.version.outputs.value }}" --locked --force
+          graveyard --version | grep "${{ steps.version.outputs.value }}"
+      - name: Smoke test PyPI install
+        if: matrix.channel == 'pypi'
+        shell: bash
+        run: |
+          python -m venv .venv
+          source .venv/bin/activate
+          python -m pip install --upgrade pip
+          python -m pip install "graveyard==${{ steps.version.outputs.value }}"
+          graveyard --version | grep "${{ steps.version.outputs.value }}"
+      - name: Smoke test npm install
+        if: matrix.channel == 'npm'
+        shell: bash
+        run: |
+          npm install -g "graveyard-cli@${{ steps.version.outputs.value }}"
+          graveyard --version | grep "${{ steps.version.outputs.value }}"
