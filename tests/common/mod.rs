@@ -3,7 +3,7 @@ use std::path::Path;
 use std::process::Command;
 
 use chrono::{Duration, Utc};
-use tempfile::{TempDir, tempdir};
+use tempfile::{tempdir, TempDir};
 
 pub struct TmpGitRepo {
     temp_dir: TempDir,
@@ -13,7 +13,10 @@ impl TmpGitRepo {
     pub fn new() -> Self {
         let temp_dir = tempdir().expect("temp dir should be created");
         run_git(&["init"], temp_dir.path());
-        run_git(&["config", "user.email", "graveyard@example.com"], temp_dir.path());
+        run_git(
+            &["config", "user.email", "graveyard@example.com"],
+            temp_dir.path(),
+        );
         run_git(&["config", "user.name", "graveyard"], temp_dir.path());
 
         Self { temp_dir }

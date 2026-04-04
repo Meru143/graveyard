@@ -151,7 +151,8 @@ fn wildcard_match(pattern: &str, candidate: &str) -> bool {
 
     while candidate_index < candidate.len() {
         if pattern_index < pattern.len()
-            && (pattern[pattern_index] == candidate[candidate_index] || pattern[pattern_index] == b'*')
+            && (pattern[pattern_index] == candidate[candidate_index]
+                || pattern[pattern_index] == b'*')
         {
             if pattern[pattern_index] == b'*' {
                 last_star = Some(pattern_index);
@@ -190,13 +191,21 @@ mod tests {
     #[test]
     fn walk_respects_gitignore_and_excludes() {
         let temp = tempdir().expect("temp dir should be created");
-        fs::write(temp.path().join(".gitignore"), "ignored.py\n").expect("gitignore should be written");
-        fs::write(temp.path().join("ignored.py"), "def ignored():\n    return 1\n")
+        fs::write(temp.path().join(".gitignore"), "ignored.py\n")
+            .expect("gitignore should be written");
+        fs::write(
+            temp.path().join("ignored.py"),
+            "def ignored():\n    return 1\n",
+        )
+        .expect("source should be written");
+        fs::write(temp.path().join("keep.py"), "def keep():\n    return 1\n")
             .expect("source should be written");
-        fs::write(temp.path().join("keep.py"), "def keep():\n    return 1\n").expect("source should be written");
         fs::create_dir_all(temp.path().join("tests")).expect("tests dir should be created");
-        fs::write(temp.path().join("tests").join("skip.py"), "def skip():\n    return 1\n")
-            .expect("source should be written");
+        fs::write(
+            temp.path().join("tests").join("skip.py"),
+            "def skip():\n    return 1\n",
+        )
+        .expect("source should be written");
 
         let config = Config {
             exclude: vec!["tests/**".to_string()],
@@ -217,11 +226,20 @@ mod tests {
     fn walk_skips_binary_files_default_dirs_and_minified_js() {
         let temp = tempdir().expect("temp dir should be created");
         fs::create_dir_all(temp.path().join("target")).expect("target dir should be created");
-        fs::write(temp.path().join("target").join("generated.rs"), "fn generated() {}\n")
+        fs::write(
+            temp.path().join("target").join("generated.rs"),
+            "fn generated() {}\n",
+        )
+        .expect("source should be written");
+        fs::write(temp.path().join("bundle.min.js"), "function minified(){}")
             .expect("source should be written");
-        fs::write(temp.path().join("bundle.min.js"), "function minified(){}").expect("source should be written");
-        fs::write(temp.path().join("data.py"), [0_u8, 159, 146, 150]).expect("binary file should be written");
-        fs::write(temp.path().join("main.ts"), "export const main = () => 1;\n").expect("source should be written");
+        fs::write(temp.path().join("data.py"), [0_u8, 159, 146, 150])
+            .expect("binary file should be written");
+        fs::write(
+            temp.path().join("main.ts"),
+            "export const main = () => 1;\n",
+        )
+        .expect("source should be written");
 
         let files = walk(temp.path(), &Config::default());
 

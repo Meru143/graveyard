@@ -260,20 +260,14 @@ const helper = (): number => 1;
         let (symbols, _) =
             extract_typescript(Path::new("src/example.ts"), Path::new("."), source, false);
 
-        assert!(
-            symbols
-                .iter()
-                .any(|symbol| symbol.name == "User" && symbol.kind == SymbolKind::Interface)
-        );
+        assert!(symbols
+            .iter()
+            .any(|symbol| symbol.name == "User" && symbol.kind == SymbolKind::Interface));
         assert!(symbols.iter().any(|symbol| {
-            symbol.name == "Id"
-                && symbol.kind == SymbolKind::TypeAlias
-                && symbol.is_exported
+            symbol.name == "Id" && symbol.kind == SymbolKind::TypeAlias && symbol.is_exported
         }));
-        assert!(
-            symbols
-                .iter()
-                .any(|symbol| symbol.name == "helper" && symbol.kind == SymbolKind::Function)
-        );
+        assert!(symbols
+            .iter()
+            .any(|symbol| symbol.name == "helper" && symbol.kind == SymbolKind::Function));
     }
 }

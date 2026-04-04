@@ -18,8 +18,8 @@ pub fn load_config(config_path: &Path) -> Result<Config> {
         Err(error) => return Err(error).with_context(|| config_path.display().to_string()),
     };
 
-    let raw: RawConfig = toml::from_str(&content)
-        .map_err(|error| format_toml_error(&content, error))?;
+    let raw: RawConfig =
+        toml::from_str(&content).map_err(|error| format_toml_error(&content, error))?;
 
     let mut config = Config::default();
 
@@ -144,7 +144,11 @@ fn format_toml_error(content: &str, error: toml::de::Error) -> ConfigError {
 
 fn line_number(content: &str, index: usize) -> usize {
     let safe_index = index.min(content.len());
-    content[..safe_index].chars().filter(|character| *character == '\n').count() + 1
+    content[..safe_index]
+        .chars()
+        .filter(|character| *character == '\n')
+        .count()
+        + 1
 }
 
 #[derive(Debug, Default, Deserialize)]
@@ -271,7 +275,10 @@ dir = "~/.cache/graveyard-test"
         assert_eq!(config.min_age, Some(Duration::from_secs(30 * 24 * 60 * 60)));
         assert!(config.fail_on_findings);
         assert_eq!(config.top, 25);
-        assert_eq!(config.languages, vec!["python".to_string(), "rust".to_string()]);
+        assert_eq!(
+            config.languages,
+            vec!["python".to_string(), "rust".to_string()]
+        );
         assert_eq!(
             config.entry_points,
             vec!["main".to_string(), "handler".to_string()]

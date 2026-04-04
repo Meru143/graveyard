@@ -1,5 +1,5 @@
-use std::collections::HashMap;
 use std::cell::Cell;
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
 
@@ -32,7 +32,9 @@ pub fn open_repo(root: &Path) -> Option<Repository> {
     match Repository::discover(root) {
         Ok(repo) => Some(repo),
         Err(_) => {
-            eprintln!("[WARN]  Not a git repository; running in static-only mode (--no-git to suppress)");
+            eprintln!(
+                "[WARN]  Not a git repository; running in static-only mode (--no-git to suppress)"
+            );
             None
         }
     }
@@ -81,7 +83,11 @@ pub fn commit_count_90d(file: &Path, repo: &Repository, repo_root: &Path) -> usi
     }
 }
 
-pub fn score_all_git(symbols: &[Symbol], repo: &Repository, root: &Path) -> HashMap<String, GitScore> {
+pub fn score_all_git(
+    symbols: &[Symbol],
+    repo: &Repository,
+    root: &Path,
+) -> HashMap<String, GitScore> {
     let head_sha = get_head_sha(repo);
     let mut grouped: HashMap<PathBuf, Vec<&Symbol>> = HashMap::new();
     let mut scores = HashMap::new();
@@ -227,10 +233,9 @@ fn hunk_to_range(hunk: DiffHunk<'_>) -> LineRange {
 fn age_days_from_history(symbol: &Symbol, history: &[FileTouch], now_ts: i64) -> f64 {
     for touch in history {
         if touch.ranges.is_empty()
-            || touch
-                .ranges
-                .iter()
-                .any(|range| ranges_overlap(symbol.line_start, symbol.line_end, range.start, range.end))
+            || touch.ranges.iter().any(|range| {
+                ranges_overlap(symbol.line_start, symbol.line_end, range.start, range.end)
+            })
         {
             let elapsed_seconds = now_ts.saturating_sub(touch.timestamp).max(0);
             return elapsed_seconds as f64 / 86_400.0;
@@ -371,7 +376,10 @@ mod tests {
     fn get_head_sha_returns_unknown_for_detached_head() {
         let temp = tempdir().expect("temp dir should be created");
         git(&["init"], temp.path());
-        write_file(&temp.path().join("src/main.py"), "def main():\n    return 1\n");
+        write_file(
+            &temp.path().join("src/main.py"),
+            "def main():\n    return 1\n",
+        );
         let now = Utc::now().timestamp();
         git_commit_all(temp.path(), "initial", now);
         git(&["checkout", "--detach", "HEAD"], temp.path());

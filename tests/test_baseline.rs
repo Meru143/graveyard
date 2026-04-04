@@ -48,7 +48,10 @@ fn main() {}
         .output()
         .expect("baseline save should execute");
 
-    assert!(output.status.success(), "command should succeed: {output:?}");
+    assert!(
+        output.status.success(),
+        "command should succeed: {output:?}"
+    );
     assert!(baseline_path.exists(), "baseline file should be written");
 
     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -60,7 +63,10 @@ fn main() {}
     let content = fs::read_to_string(&baseline_path).expect("baseline file should be readable");
     let json: Value = serde_json::from_str(&content).expect("baseline file should be json");
     assert_eq!(json["total_findings"], 1);
-    assert_eq!(json["findings"][0]["symbol_fqn"], "src/main.rs::stale_helper");
+    assert_eq!(
+        json["findings"][0]["symbol_fqn"],
+        "src/main.rs::stale_helper"
+    );
 }
 
 #[test]
@@ -142,7 +148,10 @@ fn tmp_git_repo_commits_backdated_files() {
         .output()
         .expect("git log should execute");
 
-    assert!(output.status.success(), "git log should succeed: {output:?}");
+    assert!(
+        output.status.success(),
+        "git log should succeed: {output:?}"
+    );
     assert!(repo.path().join("src/main.rs").exists());
     assert!(!String::from_utf8_lossy(&output.stdout).trim().is_empty());
 }

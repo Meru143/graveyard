@@ -54,8 +54,8 @@ func main() {
     );
 
     let json = scan_json(&repo);
-    let finding = finding_by_fqn(&json, "main.go::DeadExported")
-        .expect("dead go export should be reported");
+    let finding =
+        finding_by_fqn(&json, "main.go::DeadExported").expect("dead go export should be reported");
 
     assert!(
         finding["confidence"].as_f64().unwrap_or_default() > 0.7,

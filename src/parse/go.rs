@@ -7,8 +7,7 @@ use crate::parse::types::{build_fqn, Reference, Symbol, SymbolKind};
 
 use super::{line_span, node_text, path_is_test, source_fqn_for_node, symbol_parts};
 
-pub static GO_LANGUAGE: Lazy<tree_sitter::Language> =
-    Lazy::new(|| tree_sitter_go::LANGUAGE.into());
+pub static GO_LANGUAGE: Lazy<tree_sitter::Language> = Lazy::new(|| tree_sitter_go::LANGUAGE.into());
 
 const FUNCTION_QUERY: &str = r#"
     (function_declaration
@@ -106,12 +105,7 @@ fn collect_go_functions(
     symbols
 }
 
-fn collect_go_methods(
-    path: &Path,
-    root: &Path,
-    root_node: Node<'_>,
-    source: &[u8],
-) -> Vec<Symbol> {
+fn collect_go_methods(path: &Path, root: &Path, root_node: Node<'_>, source: &[u8]) -> Vec<Symbol> {
     let query = Query::new(&GO_LANGUAGE, METHOD_QUERY).expect("go method query is valid");
     let capture_names = query.capture_names();
     let mut cursor = QueryCursor::new();
@@ -160,12 +154,7 @@ fn collect_go_methods(
     symbols
 }
 
-fn collect_go_types(
-    path: &Path,
-    root: &Path,
-    root_node: Node<'_>,
-    source: &[u8],
-) -> Vec<Symbol> {
+fn collect_go_types(path: &Path, root: &Path, root_node: Node<'_>, source: &[u8]) -> Vec<Symbol> {
     let query = Query::new(&GO_LANGUAGE, TYPE_QUERY).expect("go type query is valid");
     let capture_names = query.capture_names();
     let mut cursor = QueryCursor::new();
@@ -262,7 +251,9 @@ fn receiver_type_name(node: Node<'_>, source: &[u8]) -> Option<String> {
 }
 
 fn is_go_exported(name: &str) -> bool {
-    name.chars().next().is_some_and(|ch| ch.is_ascii_uppercase())
+    name.chars()
+        .next()
+        .is_some_and(|ch| ch.is_ascii_uppercase())
 }
 
 #[cfg(test)]
@@ -300,25 +291,17 @@ type Service struct {}
 
         let (symbols, references) = extract_go(Path::new("src/example.go"), Path::new("."), source);
 
-        assert!(
-            symbols
-                .iter()
-                .any(|symbol| symbol.name == "Public" && symbol.is_exported)
-        );
-        assert!(
-            symbols
-                .iter()
-                .any(|symbol| symbol.name == "private" && !symbol.is_exported)
-        );
-        assert!(
-            symbols
-                .iter()
-                .any(|symbol| symbol.name == "Service" && symbol.kind == SymbolKind::Struct)
-        );
-        assert!(
-            references
-                .iter()
-                .any(|reference| reference.target_name == "private")
-        );
+        assert!(symbols
+            .iter()
+            .any(|symbol| symbol.name == "Public" && symbol.is_exported));
+        assert!(symbols
+            .iter()
+            .any(|symbol| symbol.name == "private" && !symbol.is_exported));
+        assert!(symbols
+            .iter()
+            .any(|symbol| symbol.name == "Service" && symbol.kind == SymbolKind::Struct));
+        assert!(references
+            .iter()
+            .any(|reference| reference.target_name == "private"));
     }
 }

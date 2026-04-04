@@ -3,12 +3,12 @@ use std::time::Instant;
 use anyhow::Result;
 
 use crate::cli::ScanArgs;
-use crate::config::{Config, loader::load_config, merge_cli};
-use crate::graph::{build_graph, find_dead_candidates, find_dead_cycles, find_test_only};
+use crate::config::{loader::load_config, merge_cli, Config};
 use crate::graph::reachability::find_reachable;
+use crate::graph::{build_graph, find_dead_candidates, find_dead_cycles, find_test_only};
 use crate::output::write_output;
-use crate::parse::{cache::ParseCache, parse_all};
 use crate::parse::types::Finding;
+use crate::parse::{cache::ParseCache, parse_all};
 use crate::scoring::assemble_findings;
 use crate::scoring::git_history::{
     commit_count_90d, deadness_age_days, get_head_sha, open_repo, score_all_git,
@@ -75,8 +75,14 @@ fn execute_scan(args: &ScanArgs, config: Config) -> Result<ScanExecution> {
                 )
             })
         });
-    let mut findings =
-        assemble_findings(&graph, &dead, &dead_cycles, &test_only, &git_scores, &config);
+    let mut findings = assemble_findings(
+        &graph,
+        &dead,
+        &dead_cycles,
+        &test_only,
+        &git_scores,
+        &config,
+    );
 
     if let Some(baseline_path) = &config.baseline {
         let baseline_fqns = crate::baseline::load_baseline(baseline_path)?;
@@ -125,7 +131,10 @@ pub fn run(args: ScanArgs) -> Result<()> {
 
     let findings = execution.findings;
     write_output(&findings, &config)?;
-    eprintln!("Scan completed in {:.2}s", started_at.elapsed().as_secs_f64());
+    eprintln!(
+        "Scan completed in {:.2}s",
+        started_at.elapsed().as_secs_f64()
+    );
 
     if config.fail_on_findings && !findings.is_empty() {
         std::process::exit(1);
@@ -224,6 +233,9 @@ fn main() {}
 
         let findings = run_scan(&args, config).expect("run_scan should succeed");
 
-        assert!(findings.is_empty(), "baseline should suppress known findings");
+        assert!(
+            findings.is_empty(),
+            "baseline should suppress known findings"
+        );
     }
 }

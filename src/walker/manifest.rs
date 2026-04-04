@@ -72,9 +72,13 @@ mod tests {
         let temp = tempdir().expect("temp dir should be created");
         fs::write(temp.path().join("pyproject.toml"), "").expect("manifest should be written");
         fs::write(temp.path().join("package.json"), "{}").expect("manifest should be written");
-        fs::write(temp.path().join("go.mod"), "module example.com/test").expect("manifest should be written");
-        fs::write(temp.path().join("Cargo.toml"), "[package]\nname = \"fixture\"\nversion = \"0.1.0\"\n")
+        fs::write(temp.path().join("go.mod"), "module example.com/test")
             .expect("manifest should be written");
+        fs::write(
+            temp.path().join("Cargo.toml"),
+            "[package]\nname = \"fixture\"\nversion = \"0.1.0\"\n",
+        )
+        .expect("manifest should be written");
 
         let languages = detect_languages(temp.path(), &Config::default());
 
@@ -90,7 +94,8 @@ mod tests {
         let temp = tempdir().expect("temp dir should be created");
         fs::write(temp.path().join("orphan.py"), "def f():\n    return 1\n")
             .expect("source should be written");
-        fs::write(temp.path().join("orphan.rs"), "fn main() {}\n").expect("source should be written");
+        fs::write(temp.path().join("orphan.rs"), "fn main() {}\n")
+            .expect("source should be written");
 
         let languages = detect_languages(temp.path(), &Config::default());
 

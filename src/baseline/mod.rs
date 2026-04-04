@@ -2,7 +2,7 @@ use std::path::Path;
 
 use std::collections::HashSet;
 
-use anyhow::{Context, Result, anyhow};
+use anyhow::{anyhow, Context, Result};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 
@@ -71,8 +71,8 @@ mod tests {
     use serde_json::Value;
     use tempfile::TempDir;
 
-    use crate::parse::types::{Finding, FindingTag, ScoreBreakdown, Symbol, SymbolKind};
     use super::{diff_findings, load_baseline, save_baseline};
+    use crate::parse::types::{Finding, FindingTag, ScoreBreakdown, Symbol, SymbolKind};
 
     fn sample_finding() -> Finding {
         Finding {

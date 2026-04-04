@@ -135,12 +135,7 @@ fn collect_rust_structs(
     )
 }
 
-fn collect_rust_enums(
-    path: &Path,
-    root: &Path,
-    root_node: Node<'_>,
-    source: &[u8],
-) -> Vec<Symbol> {
+fn collect_rust_enums(path: &Path, root: &Path, root_node: Node<'_>, source: &[u8]) -> Vec<Symbol> {
     collect_rust_type_symbols(
         path,
         root,
@@ -332,37 +327,26 @@ pub enum Kind { A }
 fn test_public() { public(); }
 "#;
 
-        let (symbols, references) = extract_rust(Path::new("src/example.rs"), Path::new("."), source);
+        let (symbols, references) =
+            extract_rust(Path::new("src/example.rs"), Path::new("."), source);
 
-        assert!(
-            symbols
-                .iter()
-                .any(|symbol| symbol.name == "public" && symbol.is_exported)
-        );
-        assert!(
-            symbols
-                .iter()
-                .any(|symbol| symbol.name == "crate_only" && !symbol.is_exported)
-        );
-        assert!(
-            symbols
-                .iter()
-                .any(|symbol| symbol.name == "Item" && symbol.kind == SymbolKind::Struct)
-        );
-        assert!(
-            symbols
-                .iter()
-                .any(|symbol| symbol.name == "Kind" && symbol.kind == SymbolKind::Enum)
-        );
-        assert!(
-            symbols
-                .iter()
-                .any(|symbol| symbol.name == "test_public" && symbol.is_test)
-        );
-        assert!(
-            references
-                .iter()
-                .any(|reference| reference.target_name == "helper")
-        );
+        assert!(symbols
+            .iter()
+            .any(|symbol| symbol.name == "public" && symbol.is_exported));
+        assert!(symbols
+            .iter()
+            .any(|symbol| symbol.name == "crate_only" && !symbol.is_exported));
+        assert!(symbols
+            .iter()
+            .any(|symbol| symbol.name == "Item" && symbol.kind == SymbolKind::Struct));
+        assert!(symbols
+            .iter()
+            .any(|symbol| symbol.name == "Kind" && symbol.kind == SymbolKind::Enum));
+        assert!(symbols
+            .iter()
+            .any(|symbol| symbol.name == "test_public" && symbol.is_test));
+        assert!(references
+            .iter()
+            .any(|reference| reference.target_name == "helper"));
     }
 }

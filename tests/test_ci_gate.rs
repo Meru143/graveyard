@@ -108,7 +108,9 @@ fn main() {}
 
     let stderr = String::from_utf8_lossy(&output.stderr);
     assert!(
-        stderr.contains("[WARN]  Not a git repository; running in static-only mode (--no-git to suppress)"),
+        stderr.contains(
+            "[WARN]  Not a git repository; running in static-only mode (--no-git to suppress)"
+        ),
         "stderr should report static-only warning: {stderr}"
     );
 }

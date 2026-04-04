@@ -149,8 +149,16 @@ fn result_for_finding(finding: &Finding) -> SarifResult {
 fn rule_metadata(tag: &FindingTag) -> (&'static str, &'static str, &'static str) {
     match tag {
         FindingTag::Dead => ("GY001", "Dead", "Symbol appears unreachable"),
-        FindingTag::ExportedUnused => ("GY002", "ExportedUnused", "Exported symbol has no internal callers"),
-        FindingTag::InDeadCycle => ("GY003", "InDeadCycle", "Symbol is only referenced within a dead cycle"),
+        FindingTag::ExportedUnused => (
+            "GY002",
+            "ExportedUnused",
+            "Exported symbol has no internal callers",
+        ),
+        FindingTag::InDeadCycle => (
+            "GY003",
+            "InDeadCycle",
+            "Symbol is only referenced within a dead cycle",
+        ),
         FindingTag::TestOnly => ("GY004", "TestOnly", "Symbol is only referenced from tests"),
     }
 }
@@ -203,7 +211,8 @@ mod tests {
         assert_eq!(value["version"], "2.1.0");
         assert_eq!(value["runs"][0]["results"][0]["ruleId"], "GY001");
         assert_eq!(
-            value["runs"][0]["results"][0]["locations"][0]["physicalLocation"]["region"]["startLine"],
+            value["runs"][0]["results"][0]["locations"][0]["physicalLocation"]["region"]
+                ["startLine"],
             8
         );
     }

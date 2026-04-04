@@ -53,7 +53,8 @@ pub fn find_dead_candidates(
         .filter(|idx| !reachable.contains(idx))
         .filter(|idx| !graph[*idx].is_test)
         .filter(|idx| {
-            graph.edges_directed(*idx, Direction::Incoming)
+            graph
+                .edges_directed(*idx, Direction::Incoming)
                 .all(|edge| graph[edge.source()].is_test)
         })
         .collect()
@@ -143,10 +144,8 @@ mod tests {
         let main_fqn = main.fqn.clone();
         let helper_fqn = helper.fqn.clone();
 
-        let (graph, fqn_to_idx) = build_graph(
-            vec![main, helper],
-            vec![reference(&main_fqn, "helper")],
-        );
+        let (graph, fqn_to_idx) =
+            build_graph(vec![main, helper], vec![reference(&main_fqn, "helper")]);
 
         let main_idx = fqn_to_idx[&main_fqn];
         let helper_idx = fqn_to_idx[&helper_fqn];
@@ -201,10 +200,7 @@ mod tests {
 
         let (graph, fqn_to_idx) = build_graph(
             vec![alpha, beta],
-            vec![
-                reference(&alpha_fqn, "beta"),
-                reference(&beta_fqn, "alpha"),
-            ],
+            vec![reference(&alpha_fqn, "beta"), reference(&beta_fqn, "alpha")],
         );
 
         let cycles = find_dead_cycles(&graph, &HashSet::new());

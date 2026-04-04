@@ -5,10 +5,7 @@ use petgraph::visit::Dfs;
 
 use crate::parse::types::Symbol;
 
-pub fn find_reachable(
-    graph: &DiGraph<Symbol, ()>,
-    entry_names: &[String],
-) -> HashSet<NodeIndex> {
+pub fn find_reachable(graph: &DiGraph<Symbol, ()>, entry_names: &[String]) -> HashSet<NodeIndex> {
     let entry_names = entry_names
         .iter()
         .map(String::as_str)

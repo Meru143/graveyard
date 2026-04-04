@@ -180,7 +180,8 @@ pub fn merge_cli(mut config: Config, cli: &ScanArgs) -> Config {
 pub fn expand_home(path: &Path) -> PathBuf {
     let value = path.to_string_lossy();
     if value == "~" {
-        return dirs::home_dir().unwrap_or_else(|| dirs::cache_dir().unwrap_or_else(|| path.to_path_buf()));
+        return dirs::home_dir()
+            .unwrap_or_else(|| dirs::cache_dir().unwrap_or_else(|| path.to_path_buf()));
     }
 
     if let Some(stripped) = value.strip_prefix("~/") {
@@ -299,7 +300,10 @@ mod tests {
         assert_eq!(merged.top, 5);
         assert_eq!(merged.format, OutputFormat::Csv);
         assert!(merged.no_color);
-        assert_ne!(merged.cache_dir.to_string_lossy(), "~/.cache/graveyard-test");
+        assert_ne!(
+            merged.cache_dir.to_string_lossy(),
+            "~/.cache/graveyard-test"
+        );
 
         std::env::remove_var("GRAVEYARD_MIN_CONFIDENCE");
         std::env::remove_var("NO_COLOR");

@@ -249,7 +249,9 @@ fn collect_python_references(
         });
     }
 
-    references.extend(collect_python_getattr_references(path, root, root_node, source));
+    references.extend(collect_python_getattr_references(
+        path, root, root_node, source,
+    ));
     references
 }
 
@@ -414,26 +416,18 @@ __all__ = ["helper"]
         let (symbols, references) =
             extract_python(Path::new("src/example.py"), Path::new("."), source);
 
-        assert!(
-            symbols
-                .iter()
-                .any(|symbol| symbol.name == "Greeter" && symbol.kind == SymbolKind::Class)
-        );
-        assert!(
-            symbols
-                .iter()
-                .any(|symbol| symbol.name == "hello" && symbol.kind == SymbolKind::Method)
-        );
-        assert!(
-            symbols
-                .iter()
-                .any(|symbol| symbol.name == "helper" && symbol.is_exported)
-        );
-        assert!(
-            references
-                .iter()
-                .any(|reference| reference.target_name == "helper")
-        );
+        assert!(symbols
+            .iter()
+            .any(|symbol| symbol.name == "Greeter" && symbol.kind == SymbolKind::Class));
+        assert!(symbols
+            .iter()
+            .any(|symbol| symbol.name == "hello" && symbol.kind == SymbolKind::Method));
+        assert!(symbols
+            .iter()
+            .any(|symbol| symbol.name == "helper" && symbol.is_exported));
+        assert!(references
+            .iter()
+            .any(|reference| reference.target_name == "helper"));
     }
 
     #[test]
@@ -455,15 +449,11 @@ def dynamic_handler():
             &decorators,
         );
 
-        assert!(
-            symbols
-                .iter()
-                .any(|symbol| symbol.name == "handler" && symbol.is_test)
-        );
-        assert!(
-            references
-                .iter()
-                .any(|reference| reference.target_name == "dynamic_handler")
-        );
+        assert!(symbols
+            .iter()
+            .any(|symbol| symbol.name == "handler" && symbol.is_test));
+        assert!(references
+            .iter()
+            .any(|reference| reference.target_name == "dynamic_handler"));
     }
 }

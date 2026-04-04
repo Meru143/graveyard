@@ -288,7 +288,9 @@ fn collect_references(
         });
     }
 
-    references.extend(collect_export_star_references(path, root, root_node, source, language));
+    references.extend(collect_export_star_references(
+        path, root, root_node, source, language,
+    ));
     references
 }
 
@@ -385,26 +387,18 @@ class Box {}
         let (symbols, references) =
             extract_javascript(Path::new("src/example.js"), Path::new("."), source);
 
-        assert!(
-            symbols
-                .iter()
-                .any(|symbol| symbol.name == "main" && symbol.is_exported)
-        );
-        assert!(
-            symbols
-                .iter()
-                .any(|symbol| symbol.name == "helper" && symbol.kind == SymbolKind::Function)
-        );
-        assert!(
-            symbols
-                .iter()
-                .any(|symbol| symbol.name == "Box" && symbol.kind == SymbolKind::Class)
-        );
-        assert!(
-            references
-                .iter()
-                .any(|reference| reference.target_name == "helper")
-        );
+        assert!(symbols
+            .iter()
+            .any(|symbol| symbol.name == "main" && symbol.is_exported));
+        assert!(symbols
+            .iter()
+            .any(|symbol| symbol.name == "helper" && symbol.kind == SymbolKind::Function));
+        assert!(symbols
+            .iter()
+            .any(|symbol| symbol.name == "Box" && symbol.kind == SymbolKind::Class));
+        assert!(references
+            .iter()
+            .any(|reference| reference.target_name == "helper"));
     }
 
     #[test]
@@ -414,10 +408,8 @@ class Box {}
         let (_, references) =
             extract_javascript(Path::new("src/example.js"), Path::new("."), source);
 
-        assert!(
-            references
-                .iter()
-                .any(|reference| reference.target_name == "./utils")
-        );
+        assert!(references
+            .iter()
+            .any(|reference| reference.target_name == "./utils"));
     }
 }
