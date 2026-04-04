@@ -62,12 +62,13 @@
           </div>
 
           <aside class="terminal-card" aria-label="Sample graveyard output">
-            <div class="terminal-bar">
-              <span></span>
-              <span></span>
-              <span></span>
-            </div>
-            <pre><code>$ graveyard scan --ci --min-confidence 0.80
+            <div class="terminal-shell">
+              <div class="terminal-bar">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+              <pre><code>$ graveyard scan --ci --min-confidence 0.80
 
 CONFIDENCE  TAG             AGE        LOCATION               FQN
 0.94        ExportedUnused  1.1 years  src/lib.rs:42          src/lib.rs::legacy::old_api
@@ -76,6 +77,7 @@ CONFIDENCE  TAG             AGE        LOCATION               FQN
 Found 2 dead symbol(s) - min-confidence 0.8, min-age 30 days
 $ graveyard baseline diff --baseline .graveyard-baseline.json --ci
 </code></pre>
+            </div>
           </aside>
         </section>
 
