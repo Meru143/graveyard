@@ -7,13 +7,30 @@
 [![npm](https://img.shields.io/npm/v/graveyard-cli.svg)](https://www.npmjs.com/package/graveyard-cli)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-`graveyard` finds dead code across Python, JavaScript, TypeScript, Go, and Rust in a single pass, then ranks every finding with git-aware confidence scoring. It exists because AI coding agents make cross-language dead code cheaper to create than to notice, and the existing toolchain still forces teams to stitch together language-specific scanners with no shared scoring model.
+`graveyard` is a polyglot dead-code scanner for Python, JavaScript, TypeScript, Go, and Rust. It walks a repository once, ranks findings with git-aware confidence scoring, and gives teams a practical path from local scans to CI ratchets and SARIF uploads.
+
+The project exists because AI coding agents make cross-language dead code cheaper to create than to notice, while most existing tooling still forces teams to stitch together single-language scanners with no shared ranking model.
+
+```bash
+graveyard scan --ci --min-confidence 0.80
+graveyard baseline diff --baseline .graveyard-baseline.json --ci
+```
 
 ## What is graveyard?
 
 `graveyard` is a compiled Rust CLI that walks a repository once, extracts symbols with tree-sitter, builds a unified reference graph, folds in git age and churn, then emits a ranked report in table, JSON, CSV, or SARIF form. The front-door workflow is intentionally simple: use `--min-age` when you want "show me code that has been dead for a while" and use `--min-confidence` when you want CI-grade filtering across exported APIs, dead cycles, and fresh code that might still be in flight.
 
 The repository scanner is manifest-aware, so `pyproject.toml`, `package.json`, `go.mod`, and `Cargo.toml` shape language detection automatically. `.gitignore` handling comes from the `ignore` crate, git history comes from `git2`, and the baseline commands let teams ratchet new dead code without having to clean an existing backlog in one change.
+
+## Why Teams Switch
+
+`graveyard` is built for the gap between per-language dead-code tools and the way modern repos are actually shipped. You get one scan across Python, JS/TS, Go, and Rust instead of five separate outputs, then a confidence model that uses deadness age, reference count, symbol scope, and recent churn to keep exported APIs and fresh work from dominating the queue.
+
+The adoption path is also different from tools that only emit a local report. `graveyard baseline save` and `graveyard baseline diff --ci` let a team ratchet new dead code without demanding a one-shot cleanup of the entire backlog. When you need machine-readable output, the same scan can emit JSON, CSV, or SARIF for automation and code scanning.
+
+## Proof
+
+`graveyard` is published on crates.io, PyPI, npm, and Homebrew. The release pipeline verifies Rust stable and beta across Linux, macOS, and Windows, publishes versioned release artifacts, and smoke-tests `cargo install graveyard`, `pip install graveyard`, and `npm install -g graveyard-cli` before the release closes.
 
 ## Installation
 

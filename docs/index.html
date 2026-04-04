@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>graveyard | Polyglot dead-code scanner</title>
+    <meta
+      name="description"
+      content="Find dead code across Python, JS/TS, Go, and Rust with git-aware confidence scoring, SARIF output, and baseline ratchets for CI."
+    />
+    <meta property="og:title" content="graveyard | Polyglot dead-code scanner" />
+    <meta
+      property="og:description"
+      content="Scan a repo once, rank findings with git history, and ship dead-code checks through table, JSON, CSV, or SARIF output."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://meru143.github.io/graveyard/" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <a class="wordmark" href="https://github.com/Meru143/graveyard">graveyard</a>
+        <nav class="site-nav">
+          <a href="#proof">Proof</a>
+          <a href="#install">Install</a>
+          <a href="#ci">CI</a>
+          <a href="https://github.com/Meru143/graveyard">GitHub</a>
+        </nav>
+      </header>
+
+      <main>
+        <section class="hero">
+          <div class="hero-copy">
+            <p class="eyebrow">Polyglot dead-code scanning for shipping teams</p>
+            <h1>Find dead code across Python, JS/TS, Go, and Rust.</h1>
+            <p class="hero-body">
+              <code>graveyard</code> walks a repository once, builds a cross-language
+              reference graph, folds in git history, and ranks every finding with a
+              confidence score you can actually use in CI.
+            </p>
+            <div class="hero-actions">
+              <a class="button primary" href="https://github.com/Meru143/graveyard">
+                Star on GitHub
+              </a>
+              <a class="button secondary" href="#install">Install 0.1.2</a>
+            </div>
+            <div class="proof-rail">
+              <span>crates.io</span>
+              <span>PyPI</span>
+              <span>npm</span>
+              <span>Homebrew</span>
+              <span>JSON / CSV / SARIF</span>
+              <span>baseline ratchet</span>
+            </div>
+          </div>
+
+          <aside class="terminal-card" aria-label="Sample graveyard output">
+            <div class="terminal-bar">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+            <pre><code>$ graveyard scan --ci --min-confidence 0.80
+
+CONFIDENCE  TAG             AGE        LOCATION               FQN
+0.94        ExportedUnused  1.1 years  src/lib.rs:42          src/lib.rs::legacy::old_api
+0.88        Dead            8 months   services/api/foo.py:17 services/api/foo.py::cleanup_task
+
+Found 2 dead symbol(s) - min-confidence 0.8, min-age 30 days
+$ graveyard baseline diff --baseline .graveyard-baseline.json --ci
+</code></pre>
+          </aside>
+        </section>
+
+        <section id="proof" class="section">
+          <div class="section-intro">
+            <p class="eyebrow">Why teams switch</p>
+            <h2>One tool instead of five disconnected reports.</h2>
+            <p>
+              Most dead-code tooling stops at one language, no history, and no story for
+              CI adoption. <code>graveyard</code> is built around the workflows that make
+              teams keep a scanner after the launch week: a single pass across a polyglot
+              repo, git-aware ranking, baseline ratchets, and SARIF for code scanning.
+            </p>
+          </div>
+
+          <div class="card-grid">
+            <article class="feature-card">
+              <h3>Single-pass repo scan</h3>
+              <p>
+                Manifest-aware walking covers Python, JavaScript, TypeScript, Go, and
+                Rust without splitting work across multiple linters.
+              </p>
+            </article>
+            <article class="feature-card">
+              <h3>Git-aware ranking</h3>
+              <p>
+                Findings are scored with deadness age, reference count, scope, and
+                recent churn so exported APIs and fresh code do not swamp the queue.
+              </p>
+            </article>
+            <article class="feature-card">
+              <h3>CI ratchet built in</h3>
+              <p>
+                Save a baseline once, then fail the build only when a pull request
+                introduces new dead code instead of inheriting the whole backlog.
+              </p>
+            </article>
+            <article class="feature-card">
+              <h3>Output that plugs in</h3>
+              <p>
+                Use table output locally, JSON or CSV for automation, and SARIF when you
+                want findings surfaced inside GitHub code scanning.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <div class="section-intro">
+            <p class="eyebrow">Trust signals</p>
+            <h2>Shipped through the channels developers already use.</h2>
+            <p>
+              The project is published on crates.io, PyPI, npm, and Homebrew, then
+              verified in GitHub Actions across Rust stable and beta on Linux, macOS,
+              and Windows. That install surface matters because the easiest tool to try
+              is the one people keep recommending.
+            </p>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <strong>4</strong>
+              <span>package ecosystems</span>
+            </div>
+            <div class="stat-card">
+              <strong>5</strong>
+              <span>supported languages in v1</span>
+            </div>
+            <div class="stat-card">
+              <strong>3</strong>
+              <span>output modes for automation</span>
+            </div>
+            <div class="stat-card">
+              <strong>3</strong>
+              <span>operating systems in CI</span>
+            </div>
+          </div>
+        </section>
+
+        <section id="install" class="section">
+          <div class="section-intro">
+            <p class="eyebrow">Install</p>
+            <h2>Pick the package manager your team already trusts.</h2>
+            <p>
+              The command is always <code>graveyard</code>, even when the wrapper package
+              name changes across ecosystems. That keeps local usage, CI snippets, and
+              shell completions aligned.
+            </p>
+          </div>
+
+          <div class="install-grid">
+            <article class="install-card">
+              <h3>pip / pipx</h3>
+              <pre><code>pip install graveyard
+pipx install graveyard
+graveyard --version</code></pre>
+            </article>
+            <article class="install-card">
+              <h3>npm</h3>
+              <pre><code>npm install -g graveyard-cli
+graveyard --version</code></pre>
+            </article>
+            <article class="install-card">
+              <h3>cargo</h3>
+              <pre><code>cargo install graveyard
+graveyard --version</code></pre>
+            </article>
+            <article class="install-card">
+              <h3>Homebrew</h3>
+              <pre><code>brew tap Meru143/homebrew-tap
+brew install graveyard
+graveyard --version</code></pre>
+            </article>
+          </div>
+        </section>
+
+        <section id="ci" class="section">
+          <div class="section-intro">
+            <p class="eyebrow">CI adoption</p>
+            <h2>Start with a baseline, then only fail on new dead code.</h2>
+            <p>
+              This is the wedge that makes a scanner feel realistic in an existing codebase.
+              You do not have to fix an old backlog in one merge. Save a baseline once,
+              then let pull requests earn trust by keeping the number from growing.
+            </p>
+          </div>
+
+          <div class="ci-layout">
+            <pre><code>graveyard baseline save --output .graveyard-baseline.json
+graveyard baseline diff --baseline .graveyard-baseline.json --ci</code></pre>
+            <pre><code>graveyard scan --format sarif --output graveyard.sarif
+graveyard scan --ci --min-confidence 0.80</code></pre>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
