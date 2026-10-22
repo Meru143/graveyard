@@ -31,7 +31,7 @@ If this is the dead-code workflow you wanted for mixed-language repos, star the 
 
 Most dead-code tooling is still organized by language silo. That works fine until a repository mixes Python services, TypeScript apps, Go tooling, and Rust infrastructure. At that point the problem is no longer "find unused code in one ecosystem." The problem is "give the team one dead-code workflow they can trust."
 
-`graveyard` is the wedge for that workflow. It walks a repository once, extracts symbols with tree-sitter, builds a unified reference graph, folds in git history, then emits a ranked report that works locally and in CI.
+`graveyard` gives your team that workflow in one tool. It walks your repository once, extracts symbols with tree-sitter, builds one reference graph across all supported languages, folds in git history, then hands you a single ranked report you can work through locally and enforce in CI.
 
 ## Why this is different
 
@@ -114,9 +114,9 @@ Sample terminal output:
 
 ```text
 CONFIDENCE  TAG               AGE         LOCATION                  FQN
-0.94        ExportedUnused    1.1 years   src/lib.rs:42             src/lib.rs::legacy::old_api
-0.88        Dead              8 months    services/api/foo.py:17    services/api/foo.py::cleanup_task
-Found 2 dead symbol(s) - min-confidence 0.8, min-age 30 days
+0.94        exported_unused   1.1 years   src/lib.rs:42             src/lib.rs::legacy::old_api
+0.88        dead              8 months    services/api/foo.py:17    services/api/foo.py::cleanup_task
+Found 2 dead symbol(s) — min-confidence 0.8, min-age 30 days
 ```
 
 ## Usage

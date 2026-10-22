@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Security
+
+- Upgraded `git2` to 0.21.0, `anyhow` to 1.0.104, and `crossbeam-epoch` to 0.9.21 to resolve RUSTSEC-2026-0183, RUSTSEC-2026-0184, RUSTSEC-2026-0190, and RUSTSEC-2026-0204.
+
 ## [0.1.2] - 2026-04-04
 
 ### Fixed
