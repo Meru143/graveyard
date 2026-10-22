@@ -31,7 +31,7 @@ If this is the dead-code workflow you wanted for mixed-language repos, star the 
 
 Most dead-code tooling is still organized by language silo. That works fine until a repository mixes Python services, TypeScript apps, Go tooling, and Rust infrastructure. At that point the problem is no longer "find unused code in one ecosystem." The problem is "give the team one dead-code workflow they can trust."
 
-`graveyard` gives your team that workflow in one tool. It walks your repository once, extracts symbols with tree-sitter, builds one reference graph across every language, folds in git history, then hands you a single ranked report you can work through locally and enforce in CI.
+`graveyard` gives your team that workflow in one tool. It walks your repository once, extracts symbols with tree-sitter, builds one reference graph across all supported languages, folds in git history, then hands you a single ranked report you can work through locally and enforce in CI.
 
 ## Why this is different
 
