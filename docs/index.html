@@ -17,7 +17,12 @@
       content="Stop stitching together separate dead-code tools. graveyard scans a mixed-language repo once, ranks findings with git history, and ships a CI-safe baseline diff."
     />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://meru143.github.io/graveyard/" />
+    <meta property="og:url" content="https://merup.me/graveyard/" />
+    <meta property="og:image" content="https://merup.me/og/graveyard.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://merup.me/og/graveyard.jpg" />
+    <link rel="canonical" href="https://merup.me/graveyard/" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -89,9 +94,9 @@ $ graveyard baseline diff --baseline .graveyard-baseline.json --ci
             <p class="eyebrow">Demo</p>
             <h2>See the workflow in one short loop.</h2>
             <p>
-              The demo shows the two commands that matter most for adoption: a ranked
-              scan of the current repo state, then a baseline diff that isolates only
-              newly introduced dead code for CI.
+              The demo runs the two commands you will use most: a ranked scan of the
+              current repo state, then a baseline diff that isolates only newly
+              introduced dead code for CI.
             </p>
           </div>
 
@@ -151,11 +156,10 @@ $ graveyard baseline diff --baseline .graveyard-baseline.json --ci
         <section id="compare" class="section">
           <div class="section-intro">
             <p class="eyebrow">Comparison</p>
-            <h2>The wedge is mixed-language repos, not every repo.</h2>
+            <h2>Built for mixed-language repos.</h2>
             <p>
-              The fastest way to make a new developer tool trustworthy is to be candid
-              about when something else is a better fit. <code>graveyard</code> is not
-              trying to replace every dead-code or dependency tool. It is the right
+              <code>graveyard</code> is not trying to replace every dead-code or
+              dependency tool. It is the right
               choice when the repository crosses language boundaries and the team wants
               one dead-code workflow instead of several.
             </p>
@@ -198,10 +202,9 @@ $ graveyard baseline diff --baseline .graveyard-baseline.json --ci
             <p class="eyebrow">What it looks like</p>
             <h2>From local scan output to CI ratchet in two commands.</h2>
             <p>
-              The install surface matters, but the proof is the workflow: scan once,
-              save a baseline, then only fail the build when a pull request adds new
-              dead code. The examples below show the parts teams actually wire into
-              day-to-day review and CI.
+              Scan once, save a baseline, then only fail the build when a pull request
+              adds new dead code. These are the parts teams wire into day-to-day review
+              and CI.
             </p>
           </div>
 
@@ -275,10 +278,9 @@ graveyard --version</code></pre>
             <p class="eyebrow">CI adoption</p>
             <h2>Start with a baseline, then only fail on new dead code.</h2>
             <p>
-              This is the wedge that makes a scanner feel realistic in an existing
-              codebase. You do not have to fix an old backlog in one merge. Save a
-              baseline once, then let pull requests earn trust by keeping the number
-              from growing.
+              Adopt it in an existing codebase without fixing the old backlog in one
+              merge. Save a baseline once, then let pull requests earn trust by keeping
+              the number from growing.
             </p>
           </div>
 
@@ -290,6 +292,12 @@ graveyard scan --ci --min-confidence 0.80</code></pre>
           </div>
         </section>
       </main>
+
+      <footer class="site-footer">
+        An instrument by <a href="https://merup.me/">Meru Patel</a> ·
+        <a href="https://merup.me/work/graveyard">Case study</a> ·
+        <a href="https://merup.me/#work">More instruments</a>
+      </footer>
     </div>
   </body>
 </html>
