@@ -79,10 +79,10 @@
               <pre><code>$ graveyard scan --min-age 30d --min-confidence 0.80
 
 CONFIDENCE  TAG             AGE        LOCATION               FQN
-0.94        ExportedUnused  1.1 years  src/lib.rs:42          src/lib.rs::legacy::old_api
-0.88        Dead            8 months   services/api/foo.py:17 services/api/foo.py::cleanup_task
+0.94        exported_unused 1.1 years  src/lib.rs:42          src/lib.rs::legacy::old_api
+0.88        dead            8 months   services/api/foo.py:17 services/api/foo.py::cleanup_task
 
-Found 2 dead symbol(s) - min-confidence 0.8, min-age 30 days
+Found 2 dead symbol(s) — min-confidence 0.8, min-age 30 days
 $ graveyard baseline diff --baseline .graveyard-baseline.json --ci
 </code></pre>
             </div>
@@ -213,8 +213,8 @@ $ graveyard baseline diff --baseline .graveyard-baseline.json --ci
               <h3>Local scan</h3>
               <pre><code>$ graveyard scan --format table --min-confidence 0.80
 
-0.94  ExportedUnused  src/lib.rs:42         legacy::old_api
-0.88  Dead            services/foo.py:17    cleanup_task
+0.94  exported_unused src/lib.rs:42         legacy::old_api
+0.88  dead            services/foo.py:17    cleanup_task
 
 Found 2 dead symbol(s)</code></pre>
             </article>
